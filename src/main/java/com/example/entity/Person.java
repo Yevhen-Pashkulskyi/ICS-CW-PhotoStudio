@@ -20,6 +20,10 @@ public abstract class Person implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }

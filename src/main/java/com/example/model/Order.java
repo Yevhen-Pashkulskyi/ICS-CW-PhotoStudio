@@ -54,13 +54,28 @@ public class Order implements Serializable {
     }
 
     // Геттери та сеттери (скорочено для прикладу)
+
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getId() { return id; }
     public Client getClient() { return client; }
     public Photographer getPhotographer() { return photographer; }
     public SessionType getSessionType() { return sessionType; }
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
     public LocalDateTime getOrderDate() { return orderDate; }
+    public void setTotalCost(double totalCost) {
+        this.totalCost = totalCost;
+    }
     public double getTotalCost() { return totalCost; }
     public List<Photo> getPhotos() { return photos; }
+
+    @Override
+    public String toString() {
+        return "Замовлення " + id.substring(0, 8) + " | " + client.getName() + " | " + status;
+    }
 }

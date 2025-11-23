@@ -12,7 +12,7 @@ public interface Persistable {
 
     /**
      * Зберігає поточний стан даних (колекцій) у файл.
-     * @param path Шлях до файлу (напр., "data.json").
+     * @param path Шлях до файлу.
      * @throws IOException
      */
     void saveDataToFile(String path) throws IOException;
