@@ -26,6 +26,6 @@ public class Photographer extends Person implements Serializable {
 
     @Override
     public String toString() {
-        return toString() + " [" + specialization + "]";
+        return getName() + " [" + specialization + "]";
     }
 }
