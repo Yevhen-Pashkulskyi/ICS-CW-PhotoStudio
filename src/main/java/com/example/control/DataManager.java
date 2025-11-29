@@ -68,7 +68,7 @@ public class DataManager implements Persistable, Serializable {
         orders.add(o);
         saveAllQuietly();
     }
-
+    // todo в майбутньому реалізувати
     public void addPhotographer(Photographer p) {
         photographers.add(p);
         saveAllQuietly();
@@ -82,14 +82,12 @@ public class DataManager implements Persistable, Serializable {
         }
     }
 
-    // 1. Активні замовлення
     public long getActiveOrdersCount() {
         return orders.stream()
                 .filter(o -> o.getStatus() == OrderStatus.NEW || o.getStatus() == OrderStatus.IN_PROGRESS)
                 .count();
     }
 
-    // 2. Статистика клієнтів
     public long getRegularClientsCount() {
         return clients.stream().filter(Client::isRegular).count();
     }
@@ -97,11 +95,12 @@ public class DataManager implements Persistable, Serializable {
         return clients.stream().filter(c -> !c.isRegular()).count();
     }
 
-    // 3. Фотографи
+    // todo в майбутньому реалізувати
     public int getPhotographersCount() {
         return photographers.size();
     }
 
+    // todo в майбутньому реалізувати
     public List<Photographer> getAvailablePhotographers(LocalDateTime date) {
         List<Photographer> available = new ArrayList<>();
         for (Photographer p : photographers) {
@@ -117,7 +116,7 @@ public class DataManager implements Persistable, Serializable {
         return available;
     }
 
-    // 4. Фото
+
     public List<Photo> getPhotosForOrder(String id) {
         return orders.stream()
                 .filter(o -> o.getId().equals(id))
@@ -126,7 +125,6 @@ public class DataManager implements Persistable, Serializable {
                 .orElse(new ArrayList<>());
     }
 
-    // 5. Дохід
     public double getTotalRevenueForPeriod(LocalDateTime start, LocalDateTime end) {
         return orders.stream()
                 .filter(o -> !o.getOrderDate().isBefore(start) && !o.getOrderDate().isAfter(end))
@@ -134,7 +132,6 @@ public class DataManager implements Persistable, Serializable {
                 .sum();
     }
 
-    // 6. Популярна послуга
     public Optional<String> getMostPopularSessionType() {
         return orders.stream()
                 .collect(Collectors.groupingBy(o -> o.getSessionType().getName(), Collectors.counting()))
@@ -143,7 +140,6 @@ public class DataManager implements Persistable, Serializable {
                 .map(Map.Entry::getKey);
     }
 
-    // --- CSV Implementation ---
     @Override
     public void saveDataToFile(String path) throws IOException {
         try (PrintWriter w = new PrintWriter(new FileWriter(path + "/clients.csv"))) {
