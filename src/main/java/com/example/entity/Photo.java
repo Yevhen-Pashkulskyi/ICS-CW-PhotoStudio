@@ -41,4 +41,8 @@ public class Photo implements Serializable {
     public String toString() {
         return "Photo[ID=" + id + ", Path=" + filePath + "]";
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

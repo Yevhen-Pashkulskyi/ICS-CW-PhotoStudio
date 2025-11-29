@@ -159,6 +159,13 @@ public class DataManager implements Persistable, Serializable {
                 w.println(o.getId() + "," + o.getOrderDate().toString() + "," + o.getStatus() + "," +
                         o.getClient().getId() + "," + o.getPhotographer().getId() + "," + o.getSessionType().getName() + "," + o.getTotalCost());
         }
+        try (PrintWriter w = new PrintWriter(new FileWriter(path + "/photos.csv"))) {
+            for (Order o : orders) {
+                for (Photo photo : o.getPhotos()) {
+                    w.println(photo.getId() + "," + o.getId() + "," + photo.getFilePath());
+                }
+            }
+        }
     }
 
     @Override
@@ -215,6 +222,33 @@ public class DataManager implements Persistable, Serializable {
                             o.setStatus(OrderStatus.valueOf(p[2]));
                             o.setTotalCost(Double.parseDouble(p[6]));
                             orders.add(o);
+                        }
+                    }
+                }
+            }
+        }
+
+        // === 4. НОВЕ: ЗАВАНТАЖЕННЯ ФОТОГРАФІЙ ===
+        File f4 = new File(path + "/photos.csv");
+        if (f4.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(f4))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] p = line.split(",");
+                    if (p.length >= 3) {
+                        String photoId = p[0];
+                        String orderId = p[1];
+                        String filePath = p[2];
+
+                        // Знаходимо замовлення, до якого належить це фото
+                        Optional<Order> orderOpt = orders.stream()
+                                .filter(o -> o.getId().equals(orderId))
+                                .findFirst();
+
+                        if (orderOpt.isPresent()) {
+                            Photo photo = new Photo(filePath);
+                             photo.setId(photoId);
+                            orderOpt.get().getPhotos().add(photo);
                         }
                     }
                 }

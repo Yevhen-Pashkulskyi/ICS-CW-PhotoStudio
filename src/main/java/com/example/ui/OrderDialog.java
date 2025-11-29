@@ -180,6 +180,15 @@ public class OrderDialog extends JDialog {
 
         // 4. Створення замовлення
         Order order = new Order(client, photographer, session);
+        // Генеруємо випадкову кількість фото від 3 до 10
+        int photoCount = 3 + (int)(Math.random() * 8);
+
+        for (int i = 1; i <= photoCount; i++) {
+            // Генеруємо "назву файлу"
+            String fileName = "IMG_" + (1000 + (int)(Math.random() * 9000)) + ".JPG";
+            // Додаємо у замовлення (потрібно імпортувати com.example.entity.Photo)
+            order.getPhotos().add(new com.example.entity.Photo(fileName));
+        }
         dataManager.addOrder(order);
 
         succeeded = true;
