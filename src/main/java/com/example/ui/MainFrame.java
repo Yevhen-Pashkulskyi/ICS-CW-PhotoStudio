@@ -112,7 +112,7 @@ public class MainFrame extends JFrame {
         btn.setFocusPainted(false);
         btn.setFont(new Font("Arial", Font.PLAIN, 14));
         btn.setBackground(new Color(70, 80, 100));
-        btn.setForeground(Color.BLACK);
+        btn.setForeground(Color.WHITE);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 }

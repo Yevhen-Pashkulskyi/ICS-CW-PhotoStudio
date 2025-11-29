@@ -21,8 +21,10 @@ public class OrderDialog extends JDialog {
     private JTextField clientPhoneField;
     private JTextField clientEmailField;
 
-    private JComboBox<String> sessionTypeBox;
+    // ВАЖЛИВО: Тепер тут типи об'єктів, а не String
+    private JComboBox<SessionType> sessionTypeBox;
     private JComboBox<Photographer> photographerBox;
+
     private JLabel priceLabel;
 
     public OrderDialog(Frame parent, DataManager dataManager) {
@@ -33,7 +35,6 @@ public class OrderDialog extends JDialog {
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
 
-        // Основна панель з відступами
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -42,7 +43,7 @@ public class OrderDialog extends JDialog {
         mainPanel.add(createHeader("1. Дані Клієнта"));
         mainPanel.add(Box.createVerticalStrut(10));
 
-        clientNameField = addField(mainPanel, "Ім'я Клієнта:");
+        clientNameField = addField(mainPanel, "ПІБ Клієнта:");
         clientPhoneField = addField(mainPanel, "Телефон:");
         clientEmailField = addField(mainPanel, "Email:");
 
@@ -56,13 +57,12 @@ public class OrderDialog extends JDialog {
 
         // Тип сесії
         mainPanel.add(new JLabel("Тип фотосесії:"));
-        String[] types = {
-                "Портретна (1000 грн)",
-                "Сімейна (2000 грн)",
-                "Весільна (5000 грн)",
-                "Репортаж (1500 грн)"
-        };
-        sessionTypeBox = new JComboBox<>(types);
+
+        // ВАЖЛИВО: Створюємо список для об'єктів SessionType
+        sessionTypeBox = new JComboBox<>();
+        fillSessionTypes(); // Завантажуємо з DataManager
+
+        // При виборі оновлюємо ціну
         sessionTypeBox.addActionListener(e -> updatePrice());
         mainPanel.add(sessionTypeBox);
 
@@ -77,9 +77,9 @@ public class OrderDialog extends JDialog {
         mainPanel.add(Box.createVerticalStrut(20));
 
         // Ціна
-        priceLabel = new JLabel("До сплати: 1000.0 грн");
+        priceLabel = new JLabel("До сплати: 0.0 грн");
         priceLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        priceLabel.setForeground(new Color(0, 100, 0)); // Темно-зелений
+        priceLabel.setForeground(new Color(0, 100, 0));
         priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         mainPanel.add(priceLabel);
 
@@ -88,12 +88,11 @@ public class OrderDialog extends JDialog {
         // --- КНОПКИ ---
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton cancelBtn = new JButton("Скасувати");
-        cancelBtn.setForeground(Color.BLACK);
         cancelBtn.addActionListener(e -> dispose());
 
         JButton okBtn = new JButton("Підтвердити замовлення");
         okBtn.setBackground(new Color(40, 167, 69));
-        okBtn.setForeground(Color.BLACK); // Чорний текст
+        okBtn.setForeground(Color.BLACK); // Щоб було видно текст
         okBtn.setFont(new Font("Arial", Font.BOLD, 12));
         okBtn.addActionListener(e -> onConfirm());
 
@@ -127,10 +126,17 @@ public class OrderDialog extends JDialog {
         return field;
     }
 
+    // ВАЖЛИВО: Заповнюємо реальними даними з DataManager
+    private void fillSessionTypes() {
+        for (SessionType st : dataManager.getSessionTypes()) {
+            sessionTypeBox.addItem(st);
+        }
+    }
+
     private void fillPhotographers() {
         List<Photographer> list = dataManager.getPhotographers();
         if (list.isEmpty()) {
-            photographerBox.addItem(null); // Щоб не було помилок при рендері
+            photographerBox.addItem(null);
         } else {
             for (Photographer p : list) {
                 photographerBox.addItem(p);
@@ -139,11 +145,10 @@ public class OrderDialog extends JDialog {
     }
 
     private void updatePrice() {
-        String selected = (String) sessionTypeBox.getSelectedItem();
+        SessionType selected = (SessionType) sessionTypeBox.getSelectedItem();
         if (selected != null) {
-            // Витягуємо число з дужок "Портретна (1000 грн)"
-            String priceStr = selected.replaceAll("[^0-9]", "");
-            priceLabel.setText("До сплати: " + priceStr + " грн");
+            // Беремо ціну прямо з об'єкта, ніякого парсингу тексту!
+            priceLabel.setText("До сплати: " + selected.getBasePrice() + " грн");
         }
     }
 
@@ -156,37 +161,28 @@ public class OrderDialog extends JDialog {
             return;
         }
         if (photographerBox.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Оберіть фотографа! (Спочатку додайте їх у систему)", "Помилка", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Оберіть фотографа!", "Помилка", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. Пошук або створення клієнта
+        // 2. Пошук або створення клієнта (через DataManager!)
         String phone = clientPhoneField.getText().trim();
         Client client = dataManager.findClientByPhone(phone);
 
         if (client == null) {
-            // Створюємо нового
             client = new Client(clientNameField.getText(), phone, clientEmailField.getText(), false);
             dataManager.addClient(client);
-        } else {
-            // Оновлюємо дані існуючого, якщо треба? Ні, просто використовуємо.
-            // Можна показати повідомлення: "Знайдено постійного клієнта!"
         }
 
-        // 3. Створення SessionType
-        String selectedTypeStr = (String) sessionTypeBox.getSelectedItem();
-        String typeName = selectedTypeStr.split("\\(")[0].trim();
-        double price = Double.parseDouble(selectedTypeStr.replaceAll("[^0-9]", ""));
-        SessionType session = new SessionType(typeName, price);
+        // 3. Отримання обраних об'єктів (тепер це просто!)
+        SessionType session = (SessionType) sessionTypeBox.getSelectedItem();
+        Photographer photographer = (Photographer) photographerBox.getSelectedItem();
 
         // 4. Створення замовлення
-        Photographer photographer = (Photographer) photographerBox.getSelectedItem();
         Order order = new Order(client, photographer, session);
-
         dataManager.addOrder(order);
 
         succeeded = true;
-
         JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId().substring(0,8));
         dispose();
     }
