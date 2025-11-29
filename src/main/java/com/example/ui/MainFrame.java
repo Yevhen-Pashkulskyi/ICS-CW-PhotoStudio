@@ -15,6 +15,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
+import java.util.List;
+
 public class MainFrame extends JFrame {
 
     private DataManager dataManager;

@@ -4,6 +4,7 @@ import com.example.entity.Client;
 import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
+import com.example.service.InventoryItem;
 import com.example.service.Persistable;
 import com.example.service.SessionType;
 import com.example.util.OrderStatus;
@@ -21,13 +22,12 @@ public class DataManager implements Persistable, Serializable {
     private List<Client> clients = new ArrayList<>();
     private List<Photographer> photographers = new ArrayList<>();
     private List<Order> orders = new ArrayList<>();
-    private List<SessionType> sessionTypes = new ArrayList<>(); // Довідник послуг
+    private List<SessionType> sessionTypes = new ArrayList<>();
+    private List<InventoryItem> inventory = new ArrayList<>();
 
-    // Шлях до папки з даними
     private static final String DIR = ".";
 
     public DataManager() {
-        // При створенні одразу пробуємо завантажити дані
         try {
             loadDataFromFile(DIR);
         } catch (IOException e) {
@@ -36,7 +36,6 @@ public class DataManager implements Persistable, Serializable {
         }
     }
 
-    // Якщо файлів немає, створюємо стартові послуги і фотографів, щоб програма не була пустою
     private void initBaseData() {
         if (sessionTypes.isEmpty()) {
             sessionTypes.add(new SessionType("Портрет", 1000));
@@ -58,30 +57,6 @@ public class DataManager implements Persistable, Serializable {
                 .orElse(null);
     }
 
-    /**
-     * Повертає список фотографів, які ВІЛЬНІ в заданий час.
-     * Спрощена логіка: фотограф зайнятий, якщо у нього є замовлення в цю дату +/- 2 години.
-     */
-    public List<Photographer> getAvailablePhotographers(LocalDateTime date) {
-        List<Photographer> available = new ArrayList<>();
-
-        for (Photographer p : photographers) {
-            boolean isBusy = orders.stream()
-                    .filter(o -> o.getPhotographer().getId().equals(p.getId()))
-                    .anyMatch(o -> {
-                        LocalDateTime oDate = o.getOrderDate();
-                        // Перевіряємо, чи перетинається час (в межах 2 годин)
-                        return oDate.toLocalDate().isEqual(date.toLocalDate()) &&
-                                Math.abs(oDate.getHour() - date.getHour()) < 2;
-                    });
-
-            if (!isBusy) {
-                available.add(p);
-            }
-        }
-        return available;
-    }
-
     // --- Методи додавання ---
     public void addClient(Client c) {
         clients.add(c);
@@ -98,7 +73,6 @@ public class DataManager implements Persistable, Serializable {
         saveAllQuietly();
     }
 
-    // Тихо зберігає (без викидання помилки наверх, для зручності)
     private void saveAllQuietly() {
         try {
             saveDataToFile(DIR);
@@ -107,21 +81,80 @@ public class DataManager implements Persistable, Serializable {
         }
     }
 
-    // --- CSV Implementation ---
+    // --- РЕАЛІЗАЦІЯ ЗАПИТІВ (Виправлено) ---
 
+    // 1. Активні замовлення
+    public long getActiveOrdersCount() {
+        return orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.NEW || o.getStatus() == OrderStatus.IN_PROGRESS)
+                .count();
+    }
+
+    // 2. Статистика клієнтів
+    public long getRegularClientsCount() {
+        return clients.stream().filter(Client::isRegular).count();
+    }
+    public long getNewClientsCount() {
+        return clients.stream().filter(c -> !c.isRegular()).count();
+    }
+
+    // 3. Фотографи (ЦЕЙ МЕТОД БУВ ВІДСУТНІЙ)
+    public int getPhotographersCount() {
+        return photographers.size();
+    }
+
+    public List<Photographer> getAvailablePhotographers(LocalDateTime date) {
+        List<Photographer> available = new ArrayList<>();
+        for (Photographer p : photographers) {
+            boolean isBusy = orders.stream()
+                    .filter(o -> o.getPhotographer().getId().equals(p.getId()))
+                    .anyMatch(o -> {
+                        LocalDateTime oDate = o.getOrderDate();
+                        return oDate.toLocalDate().isEqual(date.toLocalDate()) &&
+                                Math.abs(oDate.getHour() - date.getHour()) < 2;
+                    });
+            if (!isBusy) available.add(p);
+        }
+        return available;
+    }
+
+    // 4. Фото
+    public List<Photo> getPhotosForOrder(String id) {
+        return orders.stream()
+                .filter(o -> o.getId().equals(id))
+                .findFirst()
+                .map(Order::getPhotos)
+                .orElse(new ArrayList<>());
+    }
+
+    // 5. Дохід
+    public double getTotalRevenueForPeriod(LocalDateTime start, LocalDateTime end) {
+        return orders.stream()
+                .filter(o -> !o.getOrderDate().isBefore(start) && !o.getOrderDate().isAfter(end))
+                .mapToDouble(Order::getTotalCost)
+                .sum();
+    }
+
+    // 6. Популярна послуга
+    public Optional<String> getMostPopularSessionType() {
+        return orders.stream()
+                .collect(Collectors.groupingBy(o -> o.getSessionType().getName(), Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey);
+    }
+
+    // --- CSV Implementation ---
     @Override
     public void saveDataToFile(String path) throws IOException {
-        // 1. Клієнти
         try (PrintWriter w = new PrintWriter(new FileWriter(path + "/clients.csv"))) {
             for (Client c : clients)
                 w.println(c.getId() + "," + c.getName() + "," + c.getPhoneNumber() + "," + c.getEmail() + "," + c.isRegular());
         }
-        // 2. Фотографи
         try (PrintWriter w = new PrintWriter(new FileWriter(path + "/photographers.csv"))) {
             for (Photographer p : photographers)
                 w.println(p.getId() + "," + p.getName() + "," + p.getPhoneNumber() + "," + p.getSpecialization());
         }
-        // 3. Замовлення
         try (PrintWriter w = new PrintWriter(new FileWriter(path + "/orders.csv"))) {
             for (Order o : orders)
                 w.println(o.getId() + "," + o.getOrderDate().toString() + "," + o.getStatus() + "," +
@@ -135,7 +168,6 @@ public class DataManager implements Persistable, Serializable {
         photographers.clear();
         orders.clear();
 
-        // 1. Клієнти
         File f1 = new File(path + "/clients.csv");
         if (f1.exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(f1))) {
@@ -151,7 +183,6 @@ public class DataManager implements Persistable, Serializable {
             }
         }
 
-        // 2. Фотографи
         File f2 = new File(path + "/photographers.csv");
         if (f2.exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(f2))) {
@@ -166,11 +197,8 @@ public class DataManager implements Persistable, Serializable {
                 }
             }
         }
-
-        // Якщо фотографів немає з файлу, ініціалізуємо базових
         if (photographers.isEmpty()) initBaseData();
 
-        // 3. Замовлення
         File f3 = new File(path + "/orders.csv");
         if (f3.exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(f3))) {
@@ -181,7 +209,6 @@ public class DataManager implements Persistable, Serializable {
                         Client c = clients.stream().filter(i -> i.getId().equals(p[3])).findFirst().orElse(null);
                         Photographer ph = photographers.stream().filter(i -> i.getId().equals(p[4])).findFirst().orElse(null);
                         if (c != null && ph != null) {
-                            // Ціна (p[6]) і Назва послуги (p[5])
                             SessionType st = new SessionType(p[5], Double.parseDouble(p[6]));
                             Order o = new Order(c, ph, st);
                             o.setId(p[0]);
@@ -196,45 +223,8 @@ public class DataManager implements Persistable, Serializable {
         }
     }
 
-    // Геттери списків
-    public List<Client> getClients() {
-        return clients;
-    }
-
-    public List<Photographer> getPhotographers() {
-        return photographers;
-    }
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public List<SessionType> getSessionTypes() {
-        return sessionTypes;
-    }
-
-    // --- Методи для звітів (ті самі, що були) ---
-    public long getActiveOrdersCount() {
-        return orders.stream().filter(o -> o.getStatus() == OrderStatus.NEW || o.getStatus() == OrderStatus.IN_PROGRESS).count();
-    }
-
-    public long getRegularClientsCount() {
-        return clients.stream().filter(Client::isRegular).count();
-    }
-
-    public long getNewClientsCount() {
-        return clients.stream().filter(c -> !c.isRegular()).count();
-    }
-
-    public double getTotalRevenueForPeriod(LocalDateTime start, LocalDateTime end) {
-        return orders.stream().filter(o -> !o.getOrderDate().isBefore(start) && !o.getOrderDate().isAfter(end)).mapToDouble(Order::getTotalCost).sum();
-    }
-
-    public Optional<String> getMostPopularSessionType() {
-        return orders.stream().collect(Collectors.groupingBy(o -> o.getSessionType().getName(), Collectors.counting())).entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
-    }
-
-    public List<Photo> getPhotosForOrder(String id) {
-        return orders.stream().filter(o -> o.getId().equals(id)).findFirst().map(Order::getPhotos).orElse(new ArrayList<>());
-    }
+    public List<Client> getClients() { return clients; }
+    public List<Photographer> getPhotographers() { return photographers; }
+    public List<Order> getOrders() { return orders; }
+    public List<SessionType> getSessionTypes() { return sessionTypes; }
 }
