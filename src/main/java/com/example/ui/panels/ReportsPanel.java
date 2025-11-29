@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class ReportsPanel extends JPanel {
 

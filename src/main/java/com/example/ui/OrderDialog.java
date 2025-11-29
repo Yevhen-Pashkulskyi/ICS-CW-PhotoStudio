@@ -42,7 +42,7 @@ public class OrderDialog extends JDialog {
         mainPanel.add(createHeader("1. Дані Клієнта"));
         mainPanel.add(Box.createVerticalStrut(10));
 
-        clientNameField = addField(mainPanel, "ПІБ Клієнта:");
+        clientNameField = addField(mainPanel, "Ім'я Клієнта:");
         clientPhoneField = addField(mainPanel, "Телефон:");
         clientEmailField = addField(mainPanel, "Email:");
 
@@ -162,7 +162,7 @@ public class OrderDialog extends JDialog {
 
         // 2. Пошук або створення клієнта
         String phone = clientPhoneField.getText().trim();
-        Client client = findClientByPhone(phone);
+        Client client = dataManager.findClientByPhone(phone);
 
         if (client == null) {
             // Створюємо нового
@@ -189,16 +189,6 @@ public class OrderDialog extends JDialog {
 
         JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId().substring(0,8));
         dispose();
-    }
-
-    // Простий пошук клієнта (можна винести в DataManager)
-    private Client findClientByPhone(String phone) {
-        for (Client c : dataManager.getClients()) {
-            if (c.getPhoneNumber().equals(phone)) {
-                return c;
-            }
-        }
-        return null;
     }
 
     public boolean isSucceeded() {

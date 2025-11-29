@@ -89,10 +89,24 @@ public class OrdersPanel extends JPanel {
                 "Прийняти оплату " + selectedOrder.getTotalCost() + " грн?", "Оплата", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
+            // 1. Ставимо статус ОПЛАЧЕНО
             selectedOrder.setStatus(OrderStatus.PAID);
+
+            // 2. Фіксуємо платіж
             new Payment(selectedOrder.getId(), selectedOrder.getTotalCost());
+
+            // 3. === НОВА ЛОГІКА: Перевіряємо, чи став він постійним ===
+            dataManager.checkAndUpgradeClient(selectedOrder.getClient());
+
+            // 4. Оновлюємо таблицю і повідомляємо
             refreshTable();
-            JOptionPane.showMessageDialog(this, "Оплата успішна!");
+
+            if (selectedOrder.getClient().isRegular()) {
+                JOptionPane.showMessageDialog(this,
+                        "Оплата успішна!\nУВАГА: Цей клієнт досяг 3-х замовлень і отримав статус 'Постійний'!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Оплата успішна!");
+            }
         }
     }
 }

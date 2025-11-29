@@ -45,6 +45,7 @@ public class DataManager implements Persistable, Serializable {
         if (photographers.isEmpty()) {
             photographers.add(new Photographer("Олег Вінник", "0991112233", "Весілля"));
             photographers.add(new Photographer("Даша Астаф'єва", "0995556677", "Портрет"));
+            photographers.add(new Photographer("Денис Голоборотько", "0975556677", "Сімейна"));
         }
     }
 
@@ -230,6 +231,27 @@ public class DataManager implements Persistable, Serializable {
                 c.getPhoneNumber().equals(phone) ||
                         (email != null && !email.isEmpty() && c.getEmail().equalsIgnoreCase(email))
         );
+    }
+
+    /**
+     * Перевіряє історію клієнта.
+     * Якщо у нього 3 або більше оплачених замовлень, робить його постійним.
+     */
+    public void checkAndUpgradeClient(Client client) {
+        // Якщо він вже постійний - нічого не робимо
+        if (client.isRegular()) return;
+
+        long paidOrdersCount = orders.stream()
+                .filter(o -> o.getClient().getId().equals(client.getId())) // Замовлення цього клієнта
+                .filter(o -> o.getStatus() == OrderStatus.PAID)            // Тільки оплачені
+                .count();
+
+        // Поріг - 3 замовлення
+        if (paidOrdersCount >= 3) {
+            client.setRegular(true);
+            System.out.println("Вітаємо! Клієнт " + client.getName() + " став постійним!");
+            saveAllQuietly(); // Зберігаємо зміни у файл
+        }
     }
 
     public List<Client> getClients() { return clients; }
