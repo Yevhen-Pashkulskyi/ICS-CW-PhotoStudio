@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
     private ClientsPanel clientsPanel;
 
     public MainFrame() {
-        setTitle("Фотоательє IS - Курсова робота");
+        setTitle("Фотоательє");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);

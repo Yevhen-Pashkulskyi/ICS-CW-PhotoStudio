@@ -62,19 +62,35 @@ public class ClientsPanel extends JPanel {
         JTextField phoneField = new JTextField();
         JTextField emailField = new JTextField();
 
-        Object[] message = {"ПІБ:", nameField, "Телефон:", phoneField, "Email:", emailField};
+        Object[] message = {"Ім'я:", nameField, "Телефон:", phoneField, "Email:", emailField};
 
         int option = JOptionPane.showConfirmDialog(this, message, "Новий клієнт", JOptionPane.OK_CANCEL_OPTION);
 
         if (option == JOptionPane.OK_OPTION) {
-            if (!nameField.getText().isEmpty() && !phoneField.getText().isEmpty()) {
-                Client newClient = new Client(nameField.getText(), phoneField.getText(), emailField.getText(), false);
-                dataManager.addClient(newClient);
-                refreshTable();
-                JOptionPane.showMessageDialog(this, "Клієнт успішно доданий!");
-            } else {
+            String name = nameField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String email = emailField.getText().trim();
+
+            // 1. Перевірка на порожні поля
+            if (name.isEmpty() || phone.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Ім'я та телефон обов'язкові!", "Помилка", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+
+            // 2. Перевірка на дублікати
+            if (dataManager.clientExists(phone, email)) {
+                JOptionPane.showMessageDialog(this,
+                        "Клієнт з таким номером телефону або Email вже існує!",
+                        "Дублювання даних",
+                        JOptionPane.WARNING_MESSAGE);
+                return; // Зупиняємо створення
+            }
+
+            // 3. Якщо все ок — створюємо
+            Client newClient = new Client(name, phone, email, false);
+            dataManager.addClient(newClient);
+            refreshTable();
+            JOptionPane.showMessageDialog(this, "Клієнт успішно доданий!");
         }
     }
 }

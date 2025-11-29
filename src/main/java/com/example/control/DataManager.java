@@ -81,8 +81,6 @@ public class DataManager implements Persistable, Serializable {
         }
     }
 
-    // --- РЕАЛІЗАЦІЯ ЗАПИТІВ (Виправлено) ---
-
     // 1. Активні замовлення
     public long getActiveOrdersCount() {
         return orders.stream()
@@ -98,7 +96,7 @@ public class DataManager implements Persistable, Serializable {
         return clients.stream().filter(c -> !c.isRegular()).count();
     }
 
-    // 3. Фотографи (ЦЕЙ МЕТОД БУВ ВІДСУТНІЙ)
+    // 3. Фотографи
     public int getPhotographersCount() {
         return photographers.size();
     }
@@ -221,6 +219,17 @@ public class DataManager implements Persistable, Serializable {
                 }
             }
         }
+    }
+
+    /**
+     * Перевіряє, чи існує клієнт з таким телефоном або email.
+     * @return true, якщо дублікат знайдено.
+     */
+    public boolean clientExists(String phone, String email) {
+        return clients.stream().anyMatch(c ->
+                c.getPhoneNumber().equals(phone) ||
+                        (email != null && !email.isEmpty() && c.getEmail().equalsIgnoreCase(email))
+        );
     }
 
     public List<Client> getClients() { return clients; }
