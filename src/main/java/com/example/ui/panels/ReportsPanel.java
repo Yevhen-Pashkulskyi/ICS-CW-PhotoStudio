@@ -119,7 +119,7 @@ public class ReportsPanel extends JPanel {
     private void reportPhotographers() {
         StringBuilder sb = new StringBuilder("=== ФОТОГРАФИ ===\n");
         for (Photographer p : dataManager.getPhotographers()) {
-            sb.append(p.getName()).append(" (").append(p.getSpecialization()).append(")\n");
+            sb.append(p.getName()).append(" тел.").append(p.getPhoneNumber()).append(" (").append(p.getSpecialization()).append(")\n");
         }
         reportArea.setText(sb.toString());
     }
