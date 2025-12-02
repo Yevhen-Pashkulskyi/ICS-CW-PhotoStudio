@@ -32,7 +32,7 @@ public class DataManager implements Persistable, Serializable {
     private List<InventoryItem> inventory = new ArrayList<>();
 
     // Шлях до кореневої папки для зберігання файлів
-    private static final String DIR = ".";
+    private static final String DIR = "data/";
 
     /**
      * Конструктор.
@@ -69,6 +69,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Знаходить клієнта за номером телефону.
+     *
      * @param phone номер телефону для пошуку.
      * @return знайдений об'єкт Client або null, якщо не знайдено.
      */
@@ -83,6 +84,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Додає нового клієнта до списку та зберігає зміни.
+     *
      * @param c об'єкт клієнта.
      */
     public void addClient(Client c) {
@@ -92,6 +94,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Додає нове замовлення до списку та зберігає зміни.
+     *
      * @param o об'єкт замовлення.
      */
     public void addOrder(Order o) {
@@ -101,6 +104,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Додає нового фотографа до системи.
+     *
      * @param p об'єкт фотографа.
      */
     public void addPhotographer(Photographer p) {
@@ -124,6 +128,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Повертає кількість активних замовлень (статуси NEW або IN_PROGRESS).
+     *
      * @return кількість активних замовлень.
      */
     public long getActiveOrdersCount() {
@@ -156,6 +161,7 @@ public class DataManager implements Persistable, Serializable {
     /**
      * Повертає список фотографів, які вільні на вказану дату та час.
      * (Логіка перевірки перетину замовлень в межах +/- 2 годин).
+     *
      * @param date бажана дата та час сесії.
      * @return список доступних фотографів.
      */
@@ -176,6 +182,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Повертає список фотографій, прив'язаних до конкретного замовлення.
+     *
      * @param id унікальний ідентифікатор замовлення.
      * @return список об'єктів Photo.
      */
@@ -189,8 +196,9 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Розраховує загальну суму виручки (totalCost) за вказаний період.
+     *
      * @param start початок періоду.
-     * @param end кінець періоду.
+     * @param end   кінець періоду.
      * @return сума доходу.
      */
     public double getTotalRevenueForPeriod(LocalDateTime start, LocalDateTime end) {
@@ -202,6 +210,7 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Визначає назву типу фотосесії, який користується найбільшим попитом.
+     *
      * @return Optional з назвою найпопулярнішого типу.
      */
     public Optional<String> getMostPopularSessionType() {
@@ -216,29 +225,43 @@ public class DataManager implements Persistable, Serializable {
 
     /**
      * Зберігає всі колекції даних у відповідні CSV-файли.
+     *
      * @param path шлях до папки для збереження.
      * @throws IOException у разі помилок запису.
      */
     @Override
     public void saveDataToFile(String path) throws IOException {
-        // Збереження клієнтів
-        try (PrintWriter w = new PrintWriter(new FileWriter(path + "/clients.csv"))) {
-            for (Client c : clients)
-                w.println(c.getId() + "," + c.getName() + "," + c.getPhoneNumber() + "," + c.getEmail() + "," + c.isRegular());
-        }
-        // Збереження фотографів
-        try (PrintWriter w = new PrintWriter(new FileWriter(path + "/photographers.csv"))) {
-            for (Photographer p : photographers)
-                w.println(p.getId() + "," + p.getName() + "," + p.getPhoneNumber() + "," + p.getSpecialization());
-        }
-        // Збереження замовлень (з ID замість вкладених об'єктів)
-        try (PrintWriter w = new PrintWriter(new FileWriter(path + "/orders.csv"))) {
-            for (Order o : orders)
-                w.println(o.getId() + "," + o.getOrderDate().toString() + "," + o.getStatus() + "," +
-                        o.getClient().getId() + "," + o.getPhotographer().getId() + "," + o.getSessionType().getName() + "," + o.getTotalCost());
-        }
-        // Збереження фотографій (зв'язок "один до багатьох")
-        try (PrintWriter w = new PrintWriter(new FileWriter(path + "/photos.csv"))) {
+        // 1. Збереження клієнтів
+        saveCollectionToCsv(path + "/clients.csv", clients, c ->
+                c.getId() + "," + c.getName() + "," + c.getPhoneNumber() + "," + c.getEmail() + "," +
+                        c.isRegular()
+        );
+
+        // 2. Збереження фотографів
+        saveCollectionToCsv(path + "/photographers.csv", photographers, p ->
+                p.getId() + "," + p.getName() + "," + p.getPhoneNumber() + "," + p.getSpecialization()
+        );
+
+        // 3. Збереження сесій
+        saveCollectionToCsv(path + "/sessionTypes.csv", sessionTypes, s ->
+                s.getName() + "," + s.getBasePrice()
+        );
+
+        // 4. Збереження замовлень
+        saveCollectionToCsv(path + "/orders.csv", orders, o ->
+                o.getId() + "," + o.getOrderDate().toString() + "," + o.getStatus() + "," +
+                        o.getClient().getId() + "," + o.getPhotographer().getId() + "," +
+                        o.getSessionType().getName() + "," +
+                        o.getTotalCost()
+        );
+
+        // 5. Збереження фотографій (окрема логіка через вкладеність)
+        savePhotos(path + "/photos.csv");
+    }
+
+    // Специфічний метод для фото, бо там потрібен ID замовлення (складна логіка)
+    private void savePhotos(String filePath) throws IOException {
+        try (PrintWriter w = new PrintWriter(new FileWriter(filePath))) {
             for (Order o : orders) {
                 for (Photo photo : o.getPhotos()) {
                     w.println(photo.getId() + "," + o.getId() + "," + photo.getFilePath());
@@ -246,9 +269,25 @@ public class DataManager implements Persistable, Serializable {
             }
         }
     }
+    /**
+     * Універсальний метод для збереження списку об'єктів у CSV.
+     * @param filePath повний шлях до файлу.
+     * @param items список об'єктів для збереження.
+     * @param mapper функція, яка перетворює об'єкт T у рядок CSV.
+     * @param <T> тип об'єкта.
+     */
+    private <T> void saveCollectionToCsv(String filePath, List<T> items, java.util.function.Function<T, String> mapper) throws IOException {
+        try (PrintWriter w = new PrintWriter(new FileWriter(filePath))) {
+            for (T item : items) {
+                // mapper.apply(item) викликає нашу лямбду для перетворення об'єкта в рядок
+                w.println(mapper.apply(item));
+            }
+        }
+    }
 
     /**
      * Завантажує дані з CSV-файлів та відновлює об'єктні зв'язки.
+     *
      * @param path шлях до папки з файлами.
      * @throws IOException у разі помилок читання.
      */
@@ -257,6 +296,7 @@ public class DataManager implements Persistable, Serializable {
         clients.clear();
         photographers.clear();
         orders.clear();
+        sessionTypes.clear();
 
         // 1. Завантаження клієнтів
         File f1 = new File(path + "/clients.csv");
@@ -293,35 +333,27 @@ public class DataManager implements Persistable, Serializable {
         if (photographers.isEmpty()) initBaseData();
 
         // 3. Завантаження замовлень та відновлення зв'язків
-        File f3 = new File(path + "/orders.csv");
-        if (f3.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f3))) {
+        loadData(path);
+
+        // 4. Завантаження сесій
+        File f4 = new File(path + "/sessionTypes.csv");
+        if (f4.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(f4))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] p = line.split(",");
-                    if (p.length >= 7) {
-                        // Пошук об'єктів за ID
-                        Client c = clients.stream().filter(i -> i.getId().equals(p[3])).findFirst().orElse(null);
-                        Photographer ph = photographers.stream().filter(i -> i.getId().equals(p[4])).findFirst().orElse(null);
-
-                        if (c != null && ph != null) {
-                            SessionType st = new SessionType(p[5], Double.parseDouble(p[6]));
-                            Order o = new Order(c, ph, st);
-                            o.setId(p[0]);
-                            o.setOrderDate(LocalDateTime.parse(p[1]));
-                            o.setStatus(OrderStatus.valueOf(p[2]));
-                            o.setTotalCost(Double.parseDouble(p[6]));
-                            orders.add(o);
-                        }
+                    if (p.length >= 2) {
+                        SessionType sessionType = new SessionType(p[0], Double.parseDouble(p[1]));
+                        sessionTypes.add(sessionType);
                     }
                 }
             }
         }
 
-        // 4. Завантаження фотографій для замовлень
-        File f4 = new File(path + "/photos.csv");
-        if (f4.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f4))) {
+        // 5. Завантаження фотографій для замовлень
+        File f5 = new File(path + "/photos.csv");
+        if (f5.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(f5))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] p = line.split(",");
@@ -346,9 +378,37 @@ public class DataManager implements Persistable, Serializable {
         }
     }
 
+    private void loadData(String path) throws IOException {
+        File f3 = new File(path + "/orders.csv");
+        if (f3.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(f3))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] p = line.split(",");
+                    if (p.length >= 7) {
+                        // Пошук об'єктів за ID
+                        Client c = clients.stream().filter(i -> i.getId().equals(p[3])).findFirst().orElse(null);
+                        Photographer ph = photographers.stream().filter(i -> i.getId().equals(p[4])).findFirst().orElse(null);
+
+                        if (c != null && ph != null) {
+                            SessionType st = new SessionType(p[5], Double.parseDouble(p[6]));
+                            Order o = new Order(c, ph, st);
+                            o.setId(p[0]);
+                            o.setOrderDate(LocalDateTime.parse(p[1]));
+                            o.setStatus(OrderStatus.valueOf(p[2]));
+                            o.setTotalCost(Double.parseDouble(p[6]));
+                            orders.add(o);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Перевіряє, чи існує вже клієнт з таким номером телефону або email.
      * Використовується для запобігання дублювання записів.
+     *
      * @param phone номер телефону.
      * @param email електронна пошта.
      * @return true, якщо клієнт знайдений.
@@ -364,6 +424,7 @@ public class DataManager implements Persistable, Serializable {
      * Перевіряє історію замовлень клієнта.
      * Якщо клієнт має 3 або більше оплачених замовлень, йому автоматично
      * присвоюється статус "Постійний клієнт" (знижка 10%).
+     *
      * @param client об'єкт клієнта для перевірки.
      */
     public void checkAndUpgradeClient(Client client) {
@@ -382,8 +443,19 @@ public class DataManager implements Persistable, Serializable {
     }
 
     // Геттери для доступу до колекцій (для UI)
-    public List<Client> getClients() { return clients; }
-    public List<Photographer> getPhotographers() { return photographers; }
-    public List<Order> getOrders() { return orders; }
-    public List<SessionType> getSessionTypes() { return sessionTypes; }
+    public List<Client> getClients() {
+        return clients;
+    }
+
+    public List<Photographer> getPhotographers() {
+        return photographers;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public List<SessionType> getSessionTypes() {
+        return sessionTypes;
+    }
 }
