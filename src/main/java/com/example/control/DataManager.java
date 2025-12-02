@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -259,7 +260,7 @@ public class DataManager implements Persistable, Serializable {
         savePhotos(path + "/photos.csv");
     }
 
-    // Специфічний метод для фото, бо там потрібен ID замовлення (складна логіка)
+    // Збереження списку фото за ID замовлення
     private void savePhotos(String filePath) throws IOException {
         try (PrintWriter w = new PrintWriter(new FileWriter(filePath))) {
             for (Order o : orders) {
@@ -269,14 +270,16 @@ public class DataManager implements Persistable, Serializable {
             }
         }
     }
+
     /**
      * Універсальний метод для збереження списку об'єктів у CSV.
+     *
      * @param filePath повний шлях до файлу.
-     * @param items список об'єктів для збереження.
-     * @param mapper функція, яка перетворює об'єкт T у рядок CSV.
-     * @param <T> тип об'єкта.
+     * @param items    список об'єктів для збереження.
+     * @param mapper   функція, яка перетворює об'єкт T у рядок CSV.
+     * @param <T>      тип об'єкта.
      */
-    private <T> void saveCollectionToCsv(String filePath, List<T> items, java.util.function.Function<T, String> mapper) throws IOException {
+    private <T> void saveCollectionToCsv(String filePath, List<T> items, Function<T, String> mapper) throws IOException {
         try (PrintWriter w = new PrintWriter(new FileWriter(filePath))) {
             for (T item : items) {
                 // mapper.apply(item) викликає нашу лямбду для перетворення об'єкта в рядок
@@ -299,109 +302,89 @@ public class DataManager implements Persistable, Serializable {
         sessionTypes.clear();
 
         // 1. Завантаження клієнтів
-        File f1 = new File(path + "/clients.csv");
-        if (f1.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f1))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] p = line.split(",");
-                    if (p.length >= 5) {
-                        Client c = new Client(p[1], p[2], p[3], Boolean.parseBoolean(p[4]));
-                        c.setId(p[0]); // Відновлення ID
-                        clients.add(c);
-                    }
-                }
+        readCsvFile(path + "/clients.csv", parts -> {
+            if (parts.length >= 5) {
+                Client c = new Client(parts[1], parts[2], parts[3], Boolean.parseBoolean(parts[4]));
+                c.setId(parts[0]);
+                clients.add(c);
             }
-        }
+        });
 
         // 2. Завантаження фотографів
-        File f2 = new File(path + "/photographers.csv");
-        if (f2.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f2))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] p = line.split(",");
-                    if (p.length >= 4) {
-                        Photographer ph = new Photographer(p[1], p[2], p[3]);
-                        ph.setId(p[0]);
-                        photographers.add(ph);
-                    }
-                }
+        readCsvFile(path + "/photographers.csv", parts -> {
+            if (parts.length >= 4) {
+                Photographer ph = new Photographer(parts[1], parts[2], parts[3]);
+                ph.setId(parts[0]);
+                photographers.add(ph);
             }
-        }
-        // Якщо база фотографів порожня (перший запуск або видалення), додаємо базових
+        });
+
+        // Ініціалізація, якщо пусто
         if (photographers.isEmpty()) initBaseData();
 
-        // 3. Завантаження замовлень та відновлення зв'язків
-        loadData(path);
+        // 3. Завантаження типів сесій
+        readCsvFile(path + "/sessionTypes.csv", parts -> {
+            if (parts.length >= 2) {
+                sessionTypes.add(new SessionType(parts[0], Double.parseDouble(parts[1])));
+            }
+        });
 
-        // 4. Завантаження сесій
-        File f4 = new File(path + "/sessionTypes.csv");
-        if (f4.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f4))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] p = line.split(",");
-                    if (p.length >= 2) {
-                        SessionType sessionType = new SessionType(p[0], Double.parseDouble(p[1]));
-                        sessionTypes.add(sessionType);
-                    }
+        // 4. Завантаження замовлень (потребує вже завантажених клієнтів і фотографів)
+        readCsvFile(path + "/orders.csv", parts -> {
+            if (parts.length >= 7) {
+                // Шукаємо об'єкти за ID (якщо не знайдено - null)
+                Client c = clients.stream().filter(cl -> cl.getId().equals(parts[3])).findFirst().orElse(null);
+                Photographer ph = photographers.stream().filter(p -> p.getId().equals(parts[4])).findFirst().orElse(null);
+
+                if (c != null && ph != null) {
+                    SessionType st = new SessionType(parts[5], Double.parseDouble(parts[6]));
+                    Order o = new Order(c, ph, st);
+                    o.setId(parts[0]);
+                    o.setOrderDate(LocalDateTime.parse(parts[1]));
+                    o.setStatus(OrderStatus.valueOf(parts[2]));
+                    o.setTotalCost(Double.parseDouble(parts[6]));
+                    orders.add(o);
                 }
             }
-        }
+        });
 
-        // 5. Завантаження фотографій для замовлень
-        File f5 = new File(path + "/photos.csv");
-        if (f5.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f5))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] p = line.split(",");
-                    if (p.length >= 3) {
-                        String photoId = p[0];
-                        String orderId = p[1];
-                        String filePath = p[2];
+        // 5. Завантаження фотографій (потребує завантажених замовлень)
+        readCsvFile(path + "/photos.csv", parts -> {
+            if (parts.length >= 3) {
+                String photoId = parts[0];
+                String orderId = parts[1];
+                String filePath = parts[2];
 
-                        // Знаходимо замовлення за ID
-                        Optional<Order> orderOpt = orders.stream()
-                                .filter(o -> o.getId().equals(orderId))
-                                .findFirst();
-
-                        if (orderOpt.isPresent()) {
+                // Знаходимо замовлення і додаємо фото
+                orders.stream()
+                        .filter(o -> o.getId().equals(orderId))
+                        .findFirst()
+                        .ifPresent(order -> {
                             Photo photo = new Photo(filePath);
                             photo.setId(photoId);
-                            orderOpt.get().getPhotos().add(photo);
-                        }
-                    }
-                }
+                            order.getPhotos().add(photo);
+                        });
             }
-        }
+        });
     }
 
-    private void loadData(String path) throws IOException {
-        File f3 = new File(path + "/orders.csv");
-        if (f3.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(f3))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] p = line.split(",");
-                    if (p.length >= 7) {
-                        // Пошук об'єктів за ID
-                        Client c = clients.stream().filter(i -> i.getId().equals(p[3])).findFirst().orElse(null);
-                        Photographer ph = photographers.stream().filter(i -> i.getId().equals(p[4])).findFirst().orElse(null);
+    /**
+     * Універсальний метод для читання CSV файлу.
+     * @param filePath шлях до файлу.
+     * @param lineProcessor функціональний інтерфейс (Consumer), який обробляє масив рядків (частин CSV).
+     */
+    private void readCsvFile(String filePath, java.util.function.Consumer<String[]> lineProcessor) {
+        File file = new File(filePath);
+        if (!file.exists()) return; // Якщо файлу немає, просто виходимо
 
-                        if (c != null && ph != null) {
-                            SessionType st = new SessionType(p[5], Double.parseDouble(p[6]));
-                            Order o = new Order(c, ph, st);
-                            o.setId(p[0]);
-                            o.setOrderDate(LocalDateTime.parse(p[1]));
-                            o.setStatus(OrderStatus.valueOf(p[2]));
-                            o.setTotalCost(Double.parseDouble(p[6]));
-                            orders.add(o);
-                        }
-                    }
-                }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Розділяємо рядок і передаємо в лямбду для обробки
+                lineProcessor.accept(line.split(","));
             }
+        } catch (IOException e) {
+            System.err.println("Помилка читання файлу " + filePath + ": " + e.getMessage());
         }
     }
 
