@@ -5,6 +5,7 @@ import com.example.ui.panels.ClientsPanel;
 import com.example.ui.panels.DashboardPanel;
 import com.example.ui.panels.OrdersPanel;
 import com.example.ui.panels.ReportsPanel;
+import com.example.util.Constants;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,7 +29,7 @@ public class MainFrame extends JFrame {
     private DataManager dataManager;
 
     /** Шлях до директорії для збереження файлів (поточна папка). */
-    private static final String DATA_DIR_PATH = ".";
+    private static final String DATA_DIR_PATH = "data";
 
     /** Панель-контейнер для відображення змінних екранів (карток). */
     private JPanel contentPanel;
@@ -116,7 +117,7 @@ public class MainFrame extends JFrame {
         exitBtn.setBackground(new Color(200, 80, 80)); // Червоний відтінок
         exitBtn.addActionListener(e -> {
             try {
-                dataManager.saveDataToFile(DATA_DIR_PATH);
+                dataManager.saveDataToFile(Constants.DIR);
                 JOptionPane.showMessageDialog(this, "Дані збережено!");
                 System.exit(0);
             } catch (IOException ex) {

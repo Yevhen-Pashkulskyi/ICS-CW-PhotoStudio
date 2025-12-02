@@ -7,6 +7,7 @@ import com.example.model.Order;
 import com.example.service.InventoryItem;
 import com.example.service.Persistable;
 import com.example.service.SessionType;
+import com.example.util.Constants;
 import com.example.util.OrderStatus;
 
 import java.io.*;
@@ -33,7 +34,7 @@ public class DataManager implements Persistable, Serializable {
     private List<InventoryItem> inventory = new ArrayList<>();
 
     // Шлях до кореневої папки для зберігання файлів
-    private static final String DIR = "data/";
+
 
     /**
      * Конструктор.
@@ -42,7 +43,7 @@ public class DataManager implements Persistable, Serializable {
      */
     public DataManager() {
         try {
-            loadDataFromFile(DIR);
+            loadDataFromFile(Constants.DIR);
         } catch (IOException e) {
             System.out.println("Дані не знайдено. Створення базових довідників...");
             initBaseData();
@@ -119,7 +120,7 @@ public class DataManager implements Persistable, Serializable {
      */
     private void saveAllQuietly() {
         try {
-            saveDataToFile(DIR);
+            saveDataToFile(Constants.DIR);
         } catch (IOException e) {
             e.printStackTrace();
         }

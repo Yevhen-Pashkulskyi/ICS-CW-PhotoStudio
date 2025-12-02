@@ -2,9 +2,11 @@ package com.example.ui;
 
 import com.example.control.DataManager;
 import com.example.entity.Client;
+import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
+import com.example.ui.panels.Utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,30 +27,46 @@ import java.util.List;
  */
 public class OrderDialog extends JDialog {
 
-    /** Посилання на центральний контролер даних. */
+    /**
+     * Посилання на центральний контролер даних.
+     */
     private DataManager dataManager;
 
-    /** Прапорець успішного завершення операції (true, якщо натиснуто "Підтвердити"). */
+    /**
+     * Прапорець успішного завершення операції (true, якщо натиснуто "Підтвердити").
+     */
     private boolean succeeded = false;
 
     // --- Компоненти форми ---
 
-    /** Поле введення імені клієнта. */
+    /**
+     * Поле введення імені клієнта.
+     */
     private JTextField clientNameField;
 
-    /** Поле введення телефону (ключовий атрибут для пошуку клієнта). */
+    /**
+     * Поле введення телефону (ключовий атрибут для пошуку клієнта).
+     */
     private JTextField clientPhoneField;
 
-    /** Поле введення електронної пошти. */
+    /**
+     * Поле введення електронної пошти.
+     */
     private JTextField clientEmailField;
 
-    /** Випадаючий список типів фотосесій (заповнюється об'єктами {@link SessionType}). */
+    /**
+     * Випадаючий список типів фотосесій (заповнюється об'єктами {@link SessionType}).
+     */
     private JComboBox<SessionType> sessionTypeBox;
 
-    /** Випадаючий список фотографів (заповнюється об'єктами {@link Photographer}). */
+    /**
+     * Випадаючий список фотографів (заповнюється об'єктами {@link Photographer}).
+     */
     private JComboBox<Photographer> photographerBox;
 
-    /** Мітка для динамічного відображення розрахованої вартості. */
+    /**
+     * Мітка для динамічного відображення розрахованої вартості.
+     */
     private JLabel priceLabel;
 
     /**
@@ -75,7 +93,7 @@ public class OrderDialog extends JDialog {
         mainPanel.add(createHeader("1. Дані Клієнта"));
         mainPanel.add(Box.createVerticalStrut(10));
 
-        clientNameField = addField(mainPanel, "ПІБ Клієнта:");
+        clientNameField = addField(mainPanel, "Ім'я:");
         clientPhoneField = addField(mainPanel, "Телефон:");
         clientEmailField = addField(mainPanel, "Email:");
 
@@ -138,6 +156,7 @@ public class OrderDialog extends JDialog {
 
     /**
      * Створює стилізований заголовок секції.
+     *
      * @param text Текст заголовка.
      * @return налаштований JLabel.
      */
@@ -151,7 +170,8 @@ public class OrderDialog extends JDialog {
 
     /**
      * Додає пару "Мітка + Текстове поле" на панель.
-     * @param panel Панель-контейнер.
+     *
+     * @param panel     Панель-контейнер.
      * @param labelText Текст мітки.
      * @return Посилання на створене текстове поле.
      */
@@ -217,22 +237,24 @@ public class OrderDialog extends JDialog {
      * </ol>
      */
     private void onConfirm() {
+        String name = clientNameField.getText().trim();
+        String phone = clientPhoneField.getText().trim();
+        String email = clientEmailField.getText().trim();
         // 1. Валідація
-        if (clientNameField.getText().trim().isEmpty() || clientPhoneField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Введіть ім'я та телефон клієнта!", "Помилка", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        Utils utils = new Utils();
+        // 1. Перевірка
+        if (utils.validate(name, phone, email)) return;
+
         if (photographerBox.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "Оберіть фотографа!", "Помилка", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         // 2. Пошук або створення клієнта (через DataManager!)
-        String phone = clientPhoneField.getText().trim();
         Client client = dataManager.findClientByPhone(phone);
 
         if (client == null) {
-            client = new Client(clientNameField.getText(), phone, clientEmailField.getText(), false);
+            client = new Client(clientNameField.getText(), phone, email, false);
             dataManager.addClient(client);
         }
 
@@ -244,25 +266,26 @@ public class OrderDialog extends JDialog {
         Order order = new Order(client, photographer, session);
 
         // Імітація процесу зйомки: генеруємо випадкову кількість фото від 3 до 10
-        int photoCount = 3 + (int)(Math.random() * 8);
+        int photoCount = 3 + (int) (Math.random() * 8);
 
         for (int i = 1; i <= photoCount; i++) {
             // Генеруємо випадкову назву файлу
-            String fileName = "IMG_" + (1000 + (int)(Math.random() * 9000)) + ".JPG";
+            String fileName = "IMG_" + (1000 + (int) (Math.random() * 9000)) + ".JPG";
             // Додаємо об'єкт Photo у список замовлення
-            order.getPhotos().add(new com.example.entity.Photo(fileName));
+            order.getPhotos().add(new Photo(fileName));
         }
 
         // Збереження в систему
         dataManager.addOrder(order);
 
         succeeded = true;
-        JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId().substring(0,8));
+        JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId().substring(0, 8));
         dispose(); // Закриття вікна
     }
 
     /**
      * Перевіряє, чи було успішно створено замовлення.
+     *
      * @return true, якщо користувач натиснув "Підтвердити" і дані коректні.
      */
     public boolean isSucceeded() {

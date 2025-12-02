@@ -15,10 +15,14 @@ import java.awt.*;
  */
 public class ClientsPanel extends JPanel {
 
-    /** Посилання на центральний контролер даних. */
+    /**
+     * Посилання на центральний контролер даних.
+     */
     private DataManager dataManager;
 
-    /** Модель даних для таблиці, що дозволяє динамічно оновлювати рядки. */
+    /**
+     * Модель даних для таблиці, що дозволяє динамічно оновлювати рядки.
+     */
     private DefaultTableModel clientTableModel;
 
     /**
@@ -102,12 +106,9 @@ public class ClientsPanel extends JPanel {
             String name = nameField.getText().trim();
             String phone = phoneField.getText().trim();
             String email = emailField.getText().trim();
-
-            // 1. Перевірка на порожні поля
-            if (name.isEmpty() || phone.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ім'я та телефон обов'язкові!", "Помилка", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+            Utils utils = new Utils();
+            // 1. Перевірка
+            if (utils.validate(name, phone, email)) return;
 
             // 2. Перевірка на дублікати (використовує бізнес-логіку DataManager)
             if (dataManager.clientExists(phone, email)) {
@@ -125,4 +126,6 @@ public class ClientsPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Клієнт успішно доданий!");
         }
     }
+
+
 }
