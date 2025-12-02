@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.example.util.Constants.*;
+
 /**
  * Центральний контролер для управління всіма даними системи (патерн Singleton/Service).
  * Відповідає за зберігання списків сутностей у пам'яті, їх обробку (пошук, фільтрація),
@@ -43,7 +45,7 @@ public class DataManager implements Persistable, Serializable {
      */
     public DataManager() {
         try {
-            loadDataFromFile(Constants.DIR);
+            loadDataFromFile(DIR);
         } catch (IOException e) {
             System.out.println("Дані не знайдено. Створення базових довідників...");
             initBaseData();
@@ -120,7 +122,7 @@ public class DataManager implements Persistable, Serializable {
      */
     private void saveAllQuietly() {
         try {
-            saveDataToFile(Constants.DIR);
+            saveDataToFile(DIR);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -234,23 +236,23 @@ public class DataManager implements Persistable, Serializable {
     @Override
     public void saveDataToFile(String path) throws IOException {
         // 1. Збереження клієнтів
-        saveCollectionToCsv(path + "/clients.csv", clients, c ->
+        saveCollectionToCsv(path + CLIENTS, clients, c ->
                 c.getId() + "," + c.getName() + "," + c.getPhoneNumber() + "," + c.getEmail() + "," +
                         c.isRegular()
         );
 
         // 2. Збереження фотографів
-        saveCollectionToCsv(path + "/photographers.csv", photographers, p ->
+        saveCollectionToCsv(path + PHOTOGRAPHERS, photographers, p ->
                 p.getId() + "," + p.getName() + "," + p.getPhoneNumber() + "," + p.getSpecialization()
         );
 
         // 3. Збереження сесій
-        saveCollectionToCsv(path + "/sessionTypes.csv", sessionTypes, s ->
+        saveCollectionToCsv(path + SESSION_TYPES, sessionTypes, s ->
                 s.getName() + "," + s.getBasePrice()
         );
 
         // 4. Збереження замовлень
-        saveCollectionToCsv(path + "/orders.csv", orders, o ->
+        saveCollectionToCsv(path + ORDERS, orders, o ->
                 o.getId() + "," + o.getOrderDate().toString() + "," + o.getStatus() + "," +
                         o.getClient().getId() + "," + o.getPhotographer().getId() + "," +
                         o.getSessionType().getName() + "," +
@@ -258,7 +260,7 @@ public class DataManager implements Persistable, Serializable {
         );
 
         // 5. Збереження фотографій (окрема логіка через вкладеність)
-        savePhotos(path + "/photos.csv");
+        savePhotos(path + PHOTOS);
     }
 
     // Збереження списку фото за ID замовлення
@@ -303,7 +305,7 @@ public class DataManager implements Persistable, Serializable {
         sessionTypes.clear();
 
         // 1. Завантаження клієнтів
-        readCsvFile(path + "/clients.csv", parts -> {
+        readCsvFile(path + CLIENTS, parts -> {
             if (parts.length >= 5) {
                 Client c = new Client(parts[1], parts[2], parts[3], Boolean.parseBoolean(parts[4]));
                 c.setId(parts[0]);
@@ -312,7 +314,7 @@ public class DataManager implements Persistable, Serializable {
         });
 
         // 2. Завантаження фотографів
-        readCsvFile(path + "/photographers.csv", parts -> {
+        readCsvFile(path + PHOTOGRAPHERS, parts -> {
             if (parts.length >= 4) {
                 Photographer ph = new Photographer(parts[1], parts[2], parts[3]);
                 ph.setId(parts[0]);
@@ -324,14 +326,14 @@ public class DataManager implements Persistable, Serializable {
         if (photographers.isEmpty()) initBaseData();
 
         // 3. Завантаження типів сесій
-        readCsvFile(path + "/sessionTypes.csv", parts -> {
+        readCsvFile(path + SESSION_TYPES, parts -> {
             if (parts.length >= 2) {
                 sessionTypes.add(new SessionType(parts[0], Double.parseDouble(parts[1])));
             }
         });
 
         // 4. Завантаження замовлень (потребує вже завантажених клієнтів і фотографів)
-        readCsvFile(path + "/orders.csv", parts -> {
+        readCsvFile(path + ORDERS, parts -> {
             if (parts.length >= 7) {
                 // Шукаємо об'єкти за ID (якщо не знайдено - null)
                 Client c = clients.stream().filter(cl -> cl.getId().equals(parts[3])).findFirst().orElse(null);
@@ -350,7 +352,7 @@ public class DataManager implements Persistable, Serializable {
         });
 
         // 5. Завантаження фотографій (потребує завантажених замовлень)
-        readCsvFile(path + "/photos.csv", parts -> {
+        readCsvFile(path + PHOTOS, parts -> {
             if (parts.length >= 3) {
                 String photoId = parts[0];
                 String orderId = parts[1];
