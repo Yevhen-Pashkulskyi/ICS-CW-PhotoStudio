@@ -11,6 +11,7 @@ import com.example.ui.panels.Utils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
  * <p>
  * Надає інтерфейс для:
  * <ul>
- * <li>Введення даних клієнта (ПІБ, телефон, email).</li>
+ * <li>Введення даних клієнта (Ім'я, телефон, email).</li>
  * <li>Вибору типу фотосесії (з автоматичним розрахунком ціни).</li>
  * <li>Вибору фотографа зі списку доступних.</li>
  * </ul>
@@ -250,6 +251,23 @@ public class OrderDialog extends JDialog {
             return;
         }
 
+        Photographer selectedPhotographer = (Photographer) photographerBox.getSelectedItem();
+        // Оскільки замовлення створюється на "зараз", перевіряємо поточний час
+        LocalDateTime now = LocalDateTime.now();
+        // Отримуємо список вільних фотографів на цей час
+        List<Photographer> freePhotographers = dataManager.getAvailablePhotographers(now);
+        // Перевіряємо, чи є наш обраний фотограф у списку вільних
+        // (порівнюємо за ID, щоб уникнути помилок посилань)
+        boolean isBusy = freePhotographers.stream()
+                .noneMatch(p -> p.getId().equals(selectedPhotographer.getId()));
+
+        if (isBusy) {
+            JOptionPane.showMessageDialog(this,
+                    "Увага! Фотограф " + selectedPhotographer.getName() + " зараз зайнятий іншим замовленням.\nОберіть іншого фахівця або спробуйте пізніше.",
+                    "Фотограф зайнятий",
+                    JOptionPane.ERROR_MESSAGE);
+            return; // Зупиняємо процес, замовлення НЕ створюється
+        }
         // 2. Пошук або створення клієнта (через DataManager!)
         Client client = dataManager.findClientByPhone(phone);
 

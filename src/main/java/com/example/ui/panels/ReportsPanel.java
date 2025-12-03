@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Панель графічного інтерфейсу для модуля аналітики та звітності.
@@ -117,9 +118,30 @@ public class ReportsPanel extends JPanel {
      * Виводить список персоналу та їх спеціалізацію.
      */
     private void reportPhotographers() {
-        StringBuilder sb = new StringBuilder("=== ФОТОГРАФИ ===\n");
+        LocalDateTime now = LocalDateTime.now();
+
+        // Отримуємо список тих, хто вільний прямо зараз
+        java.util.List<Photographer> freePhotographers = dataManager.getAvailablePhotographers(now);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== ЗАПИТ 3: ФОТОГРАФИ ТА СТАТУС ===\n");
+        sb.append("Станом на: ").append(now.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).append("\n");
+        sb.append("Всього фотографів: ").append(dataManager.getPhotographersCount()).append("\n\n");
+
         for (Photographer p : dataManager.getPhotographers()) {
-            sb.append(p.getName()).append(" тел.").append(p.getPhoneNumber()).append(" (").append(p.getSpecialization()).append(")\n");
+            sb.append("• ").append(p.getName()).append(" (").append(p.getSpecialization()).append(")");
+
+            // Перевіряємо, чи є цей фотограф у списку вільних
+            // Порівнюємо за ID, щоб було надійно
+            boolean isFree = freePhotographers.stream()
+                    .anyMatch(free -> free.getId().equals(p.getId()));
+
+            if (isFree) {
+                sb.append("\n   [СТАТУС]: ВІЛЬНИЙ ✅ (Готовий до роботи)");
+            } else {
+                sb.append("\n   [СТАТУС]: ЗАЙНЯТИЙ ❌ (Має замовлення у цей час)");
+            }
+            sb.append("\n---------------------------\n");
         }
         reportArea.setText(sb.toString());
     }

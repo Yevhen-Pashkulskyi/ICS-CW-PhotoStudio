@@ -35,9 +35,6 @@ public class DataManager implements Persistable, Serializable {
     private List<SessionType> sessionTypes = new ArrayList<>(); // Довідник типів послуг
     private List<InventoryItem> inventory = new ArrayList<>();
 
-    // Шлях до кореневої папки для зберігання файлів
-
-
     /**
      * Конструктор.
      * При ініціалізації намагається завантажити дані з файлів.
