@@ -1,12 +1,14 @@
 package com.example.entity;
 
 import java.io.Serializable;
+import lombok.*;
 
 /**
  * Клас, що представляє клієнта фотоательє.
  * Розширює абстрактний клас {@link Person}, додаючи специфічні атрибути,
  * такі як електронна пошта та статус лояльності.
  */
+@Data
 public class Client extends Person implements Serializable {
 
     /**
@@ -33,32 +35,6 @@ public class Client extends Person implements Serializable {
         this.email = email;
         this.isRegular = isRegular;
     }
-
-    /**
-     * Отримує електронну пошту клієнта.
-     * @return рядок з email адресою.
-     */
-    public String getEmail() { return email; }
-
-    /**
-     * Встановлює або оновлює електронну пошту клієнта.
-     * @param email нова адреса електронної пошти.
-     */
-    public void setEmail(String email) { this.email = email; }
-
-    /**
-     * Перевіряє, чи є клієнт постійним.
-     * Цей метод використовується в бізнес-логіці для розрахунку вартості замовлення.
-     * @return true, якщо клієнт має статус постійного.
-     */
-    public boolean isRegular() { return isRegular; }
-
-    /**
-     * Змінює статус лояльності клієнта.
-     * Викликається автоматично, коли клієнт досягає певної кількості замовлень.
-     * @param regular true для надання статусу постійного клієнта.
-     */
-    public void setRegular(boolean regular) { isRegular = regular; }
 
     /**
      * Повертає строкове представлення клієнта для відображення у списках.

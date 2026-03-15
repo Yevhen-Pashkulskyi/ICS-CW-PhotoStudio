@@ -114,7 +114,7 @@ public class MainFrame extends JFrame {
         // Кнопка безпечного виходу
         JButton exitBtn = new JButton("Зберегти та Вийти");
         styleButton(exitBtn);
-        exitBtn.setBackground(new Color(200, 80, 80)); // Червоний відтінок
+        exitBtn.setBackground(new Color(255, 255, 255)); // Червоний відтінок
         exitBtn.addActionListener(e -> {
             try {
                 dataManager.saveDataToFile(Constants.DIR);
@@ -163,8 +163,8 @@ public class MainFrame extends JFrame {
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         btn.setFocusPainted(true); // Прибирає рамку фокусу
         btn.setFont(new Font("Arial", Font.PLAIN, 14));
-        btn.setBackground(new Color(70, 80, 100));
-        btn.setForeground(Color.LIGHT_GRAY);
+        btn.setBackground(new Color(255, 255, 255));
+        btn.setForeground(Color.BLACK);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 }
