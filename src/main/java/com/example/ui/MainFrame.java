@@ -164,7 +164,7 @@ public class MainFrame extends JFrame {
         btn.setFocusPainted(true); // Прибирає рамку фокусу
         btn.setFont(new Font("Arial", Font.PLAIN, 14));
         btn.setBackground(new Color(70, 80, 100));
-        btn.setForeground(Color.BLACK);
+        btn.setForeground(Color.LIGHT_GRAY);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 }
