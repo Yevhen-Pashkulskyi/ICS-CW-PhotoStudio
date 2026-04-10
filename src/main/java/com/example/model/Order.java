@@ -23,7 +23,7 @@ import lombok.*;
  * <li><b>Композиція:</b> {@link SessionType} та список {@link Photo} (є частиною замовлення).</li>
  * </ul>
  */
-@Getter
+@Data
 public class Order implements Serializable {
 
     /** Унікальний ідентифікатор замовлення (UUID). */
@@ -47,7 +47,7 @@ public class Order implements Serializable {
     /** Тип обраної фотосесії (містить назву та базову ціну). */
     private final SessionType sessionType;
 
-    /** Список готових фотографій, прив'язаних до цього замовлення.*/
+    /** Список готових фотографій, прив'язаних до цього замовлення. */
     private final List<Photo> photos;
 
     /**
