@@ -8,6 +8,8 @@ import com.example.util.OrderStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -94,5 +96,59 @@ public class DataManagerTest {
 
         // Клієнт мав стати постійним
         assertTrue(c.isRegular(), "Клієнт повинен стати постійним після 3 оплачених замовлень");
+    }
+
+    // Правило 1: Дата НЕ збігається. Час не важливий -> Вільний
+    @Test
+    public void testPhotographerIsFreeDifferentDate() {
+        Photographer p = new Photographer("TestP", "000", "S");
+        dataManager.getPhotographers().add(p);
+
+        Order o = new Order(new Client("C", "1", "e", false), p, new SessionType("S", 100.0));
+        o.setOrderDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
+        dataManager.addOrder(o);
+
+        // Запит на ІНШИЙ ДЕНЬ (25 жовтня), але той самий час
+        LocalDateTime requestDate = LocalDateTime.of(2026, 10, 25, 14, 0);
+        List<Photographer> available = dataManager.getAvailablePhotographers(requestDate);
+
+        assertTrue(available.stream().anyMatch(photog -> photog.getId().equals(p.getId())),
+                "Правило 1: Фотограф має бути вільним у інший день");
+    }
+
+    // Правило 2: Дата збігається. Різниця в часі >= 2 годин -> Вільний
+    @Test
+    public void testPhotographerIsFreeSameDateDifferentTime() {
+        Photographer p = new Photographer("TestP", "000", "S");
+        dataManager.getPhotographers().add(p);
+
+        Order o = new Order(new Client("C", "1", "e", false), p, new SessionType("S", 100.0));
+        o.setOrderDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
+        dataManager.addOrder(o);
+
+        // Запит на ТОЙ САМИЙ ДЕНЬ, але о 10:00 (різниця 4 години)
+        LocalDateTime requestDate = LocalDateTime.of(2026, 10, 20, 10, 0);
+        List<Photographer> available = dataManager.getAvailablePhotographers(requestDate);
+
+        assertTrue(available.stream().anyMatch(photog -> photog.getId().equals(p.getId())),
+                "Правило 2: Фотограф має бути вільним, оскільки різниця більше 2 годин");
+    }
+
+    // Правило 3: Дата збігається. Різниця в часі < 2 годин -> Зайнятий
+    @Test
+    public void testPhotographerIsBusySameDateCloseTime() {
+        Photographer p = new Photographer("TestP", "000", "S");
+        dataManager.getPhotographers().add(p);
+
+        Order o = new Order(new Client("C", "1", "e", false), p, new SessionType("S", 100.0));
+        o.setOrderDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
+        dataManager.addOrder(o);
+
+        // Запит на ТОЙ САМИЙ ДЕНЬ о 15:00 (різниця всього 1 година)
+        LocalDateTime requestDate = LocalDateTime.of(2026, 10, 20, 15, 0);
+        List<Photographer> available = dataManager.getAvailablePhotographers(requestDate);
+
+        assertFalse(available.stream().anyMatch(photog -> photog.getId().equals(p.getId())),
+                "Правило 3: Фотограф має бути зайнятим, якщо пройшло менше 2 годин");
     }
 }
