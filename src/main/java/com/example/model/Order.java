@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 /**
  * Центральний клас моделі, що представляє замовлення на фотосесію.
@@ -22,31 +23,32 @@ import java.util.UUID;
  * <li><b>Композиція:</b> {@link SessionType} та список {@link Photo} (є частиною замовлення).</li>
  * </ul>
  */
+@Getter
 public class Order implements Serializable {
 
     /** Унікальний ідентифікатор замовлення (UUID). */
-    private String id;
+    private final String id;
 
     /** Дата та час створення замовлення. */
-    private LocalDateTime orderDate;
+    private final LocalDateTime orderDate;
 
     /** Поточний статус виконання (наприклад, NEW, PAID). */
-    private OrderStatus status;
+    private final OrderStatus status;
 
     /** Фінальна вартість замовлення з урахуванням усіх знижок. */
     private double totalCost;
 
     /** Клієнт, який оформив замовлення. */
-    private Client client;
+    private final Client client;
 
     /** Фотограф, призначений для виконання замовлення. */
-    private Photographer photographer;
+    private final Photographer photographer;
 
     /** Тип обраної фотосесії (містить назву та базову ціну). */
-    private SessionType sessionType;
+    private final SessionType sessionType;
 
-    /** Список готових фотографій, прив'язаних до цього замовлення. */
-    private List<Photo> photos;
+    /** Список готових фотографій, прив'язаних до цього замовлення.*/
+    private final List<Photo> photos;
 
     /**
      * Конструктор для створення нового замовлення.
@@ -82,59 +84,6 @@ public class Order implements Serializable {
         this.totalCost = currentCost;
         return totalCost;
     }
-
-    // --- Геттери та сеттери ---
-
-    /**
-     * Встановлює ID вручну (використовується при відновленні даних з файлу).
-     * @param id унікальний ідентифікатор.
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() { return id; }
-
-    public Client getClient() { return client; }
-
-    public Photographer getPhotographer() { return photographer; }
-
-    public SessionType getSessionType() { return sessionType; }
-
-    public OrderStatus getStatus() { return status; }
-
-    /**
-     * Змінює статус замовлення (наприклад, при оплаті).
-     * @param status новий статус.
-     */
-    public void setStatus(OrderStatus status) { this.status = status; }
-
-    /**
-     * Встановлює дату замовлення (використовується при відновленні з файлу).
-     * @param orderDate дата створення.
-     */
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public LocalDateTime getOrderDate() { return orderDate; }
-
-    /**
-     * Встановлює вартість вручну (використовується при відновленні з файлу).
-     * @param totalCost сума замовлення.
-     */
-    public void setTotalCost(double totalCost) {
-        this.totalCost = totalCost;
-    }
-
-    public double getTotalCost() { return totalCost; }
-
-    /**
-     * Повертає список фотографій.
-     * Дозволяє додавати нові фото до замовлення.
-     * @return список об'єктів Photo.
-     */
-    public List<Photo> getPhotos() { return photos; }
 
     /**
      * Повертає коротке строкове представлення замовлення для списків UI.
