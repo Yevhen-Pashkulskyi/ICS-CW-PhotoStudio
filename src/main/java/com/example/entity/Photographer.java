@@ -1,13 +1,17 @@
 package com.example.entity;
 
 import com.example.service.Schedule;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
  * Клас, що представляє співробітника-фотографа у системі.
  * Успадковує базові властивості людини від класу {@link Person}.
- * Реалізує принцип композиції, включаючи об'єкт {@link Schedule} як невід'ємну частину.
+ * Реалізує принцип композиції, включаючи об'єкт {@link Schedule} як не від'ємну частину.
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class Photographer extends Person implements Serializable {
 
     /**
@@ -36,19 +40,6 @@ public class Photographer extends Person implements Serializable {
         // Об'єкт розкладу створюється разом з фотографом (жорстка композиція)
         this.schedule = new Schedule();
     }
-
-    /**
-     * Отримує спеціалізацію фотографа.
-     * @return рядок з назвою спеціалізації.
-     */
-    public String getSpecialization() { return specialization; }
-
-    /**
-     * Повертає об'єкт розкладу фотографа.
-     * Використовується системою для перевірки вільних слотів (getAvailablePhotographers).
-     * @return об'єкт Schedule.
-     */
-    public Schedule getSchedule() { return schedule; }
 
     /**
      * Повертає строкове представлення фотографа для відображення у списках GUI.

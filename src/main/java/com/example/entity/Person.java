@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import lombok.Data;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
  * Містить спільні атрибути, такі як ідентифікатор, ім'я та контактні дані.
  * Реалізує інтерфейс {@link Serializable} для забезпечення можливості збереження стану об'єктів у файл.
  */
+@Data
 public abstract class Person implements Serializable {
 
     /**
@@ -42,61 +44,10 @@ public abstract class Person implements Serializable {
     }
 
     /**
-     * Встановлює ідентифікатор вручну.
-     * Цей метод критично важливий для відновлення цілісності даних
-     * при завантаженні об'єктів із зовнішніх файлів (CSV, DB).
-     *
-     * @param id рядок з унікальним ідентифікатором.
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * Отримує унікальний ідентифікатор особи.
-     * @return рядок ID.
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Отримує ім'я особи.
-     * @return рядок з іменем.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Змінює ім'я особи.
-     * @param name нове ім'я.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Отримує номер телефону.
-     * @return рядок з номером телефону.
-     */
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    /**
-     * Змінює контактний номер телефону.
-     * @param phoneNumber новий номер телефону.
-     */
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    /**
      * Повертає строкове представлення особи.
      * Базова реалізація, яка може бути розширена у нащадках.
      *
-     * @return рядок у форматі "Ім'я ( тел: Номер )".
+     * @return рядок у форматі "Ім'я (тел: Номер)".
      */
     @Override
     public String toString() {

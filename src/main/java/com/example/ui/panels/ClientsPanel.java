@@ -18,12 +18,12 @@ public class ClientsPanel extends JPanel {
     /**
      * Посилання на центральний контролер даних.
      */
-    private DataManager dataManager;
+    private final DataManager dataManager;
 
     /**
      * Модель даних для таблиці, що дозволяє динамічно оновлювати рядки.
      */
-    private DefaultTableModel clientTableModel;
+    private final DefaultTableModel clientTableModel;
 
     /**
      * Конструктор панелі клієнтів.

@@ -20,13 +20,13 @@ public class DashboardPanel extends JPanel {
      * Необхідне для того, щоб діалогові вікна (наприклад, OrderDialog)
      * відкривалися як модальні відносно центру програми.
      */
-    private JFrame parentFrame;
+    private final JFrame parentFrame;
 
     /**
      * Посилання на контролер даних.
      * Передається далі у діалогові вікна для збереження нових замовлень.
      */
-    private DataManager dataManager;
+    private final DataManager dataManager;
 
     /**
      * Конструктор панелі Dashboard.

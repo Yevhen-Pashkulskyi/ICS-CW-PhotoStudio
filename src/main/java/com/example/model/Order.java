@@ -27,13 +27,13 @@ import lombok.*;
 public class Order implements Serializable {
 
     /** Унікальний ідентифікатор замовлення (UUID). */
-    private final String id;
+    private String id;
 
     /** Дата та час створення замовлення. */
-    private final LocalDateTime orderDate;
+    private LocalDateTime orderDate;
 
     /** Поточний статус виконання (наприклад, NEW, PAID). */
-    private final OrderStatus status;
+    private OrderStatus status;
 
     /** Фінальна вартість замовлення з урахуванням усіх знижок. */
     private double totalCost;

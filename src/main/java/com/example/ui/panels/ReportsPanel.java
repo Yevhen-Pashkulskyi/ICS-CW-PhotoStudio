@@ -21,10 +21,10 @@ import java.time.format.DateTimeFormatter;
 public class ReportsPanel extends JPanel {
 
     /** Посилання на контролер даних для отримання статистики. */
-    private DataManager dataManager;
+    private final DataManager dataManager;
 
     /** Текстова область для відображення згенерованих звітів. */
-    private JTextArea reportArea;
+    private final JTextArea reportArea;
 
     /**
      * Конструктор панелі звітів.

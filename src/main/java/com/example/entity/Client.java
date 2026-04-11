@@ -8,6 +8,7 @@ import lombok.*;
  * Розширює абстрактний клас {@link Person}, додаючи специфічні атрибути,
  * такі як електронна пошта та статус лояльності.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class Client extends Person implements Serializable {
 

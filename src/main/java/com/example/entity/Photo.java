@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import lombok.Data;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
  * Зберігає інформацію про унікальний ідентифікатор та фізичне розташування файлу.
  * Використовується у списку фотографій об'єкта Order (композиція).
  */
+@Data
 public class Photo implements Serializable {
 
     /**
@@ -32,32 +34,6 @@ public class Photo implements Serializable {
     }
 
     /**
-     * Отримує унікальний ідентифікатор фотографії.
-     * @return рядок з ID.
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Отримує шлях до файлу зображення.
-     * @return рядок зі шляхом до файлу.
-     */
-    public String getFilePath() {
-        return filePath;
-    }
-
-    /**
-     * Встановлює або оновлює шлях до файлу.
-     * Може використовуватися при переміщенні файлу або редагуванні шляху.
-     *
-     * @param filePath новий шлях до файлу.
-     */
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    /**
      * Повертає строкове представлення об'єкта фотографії.
      * Зручно для логування та налагодження.
      * @return рядок у форматі "Photo[ID=..., Path=...]".
@@ -65,16 +41,5 @@ public class Photo implements Serializable {
     @Override
     public String toString() {
         return "Photo[ID=" + id + ", Path=" + filePath + "]";
-    }
-
-    /**
-     * Встановлює ідентифікатор вручну.
-     * Цей метод критично важливий для коректного відновлення зв'язків
-     * при завантаженні даних із зовнішнього сховища (CSV, БД).
-     *
-     * @param id рядок з ідентифікатором.
-     */
-    public void setId(String id) {
-        this.id = id;
     }
 }

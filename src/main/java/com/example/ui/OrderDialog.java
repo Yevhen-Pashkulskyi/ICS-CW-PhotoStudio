@@ -7,6 +7,8 @@ import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
 import com.example.ui.panels.Utils;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -26,12 +28,14 @@ import java.util.List;
  * При підтвердженні створює об'єкт {@link Order}, генерує тестові фотографії
  * та зберігає дані через {@link DataManager}.
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class OrderDialog extends JDialog {
 
     /**
      * Посилання на центральний контролер даних.
      */
-    private DataManager dataManager;
+    private final DataManager dataManager;
 
     /**
      * Прапорець успішного завершення операції (true, якщо натиснуто "Підтвердити").
@@ -43,32 +47,32 @@ public class OrderDialog extends JDialog {
     /**
      * Поле введення імені клієнта.
      */
-    private JTextField clientNameField;
+    private final JTextField clientNameField;
 
     /**
      * Поле введення телефону (ключовий атрибут для пошуку клієнта).
      */
-    private JTextField clientPhoneField;
+    private final JTextField clientPhoneField;
 
     /**
      * Поле введення електронної пошти.
      */
-    private JTextField clientEmailField;
+    private final JTextField clientEmailField;
 
     /**
      * Випадаючий список типів фотосесій (заповнюється об'єктами {@link SessionType}).
      */
-    private JComboBox<SessionType> sessionTypeBox;
+    private final JComboBox<SessionType> sessionTypeBox;
 
     /**
      * Випадаючий список фотографів (заповнюється об'єктами {@link Photographer}).
      */
-    private JComboBox<Photographer> photographerBox;
+    private final JComboBox<Photographer> photographerBox;
 
     /**
      * Мітка для динамічного відображення розрахованої вартості.
      */
-    private JLabel priceLabel;
+    private final JLabel priceLabel;
 
     /**
      * Конструктор діалогового вікна.
@@ -135,6 +139,14 @@ public class OrderDialog extends JDialog {
         add(mainPanel, BorderLayout.CENTER);
 
         // --- Панель кнопок (OK / Cancel) ---
+        var btnPanel = getJPanel();
+        add(btnPanel, BorderLayout.SOUTH);
+
+        // Розрахунок ціни для початкового вибору
+        updatePrice();
+    }
+
+    private JPanel getJPanel() {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton cancelBtn = new JButton("Скасувати");
         cancelBtn.addActionListener(e -> dispose());
@@ -147,10 +159,7 @@ public class OrderDialog extends JDialog {
 
         btnPanel.add(cancelBtn);
         btnPanel.add(okBtn);
-        add(btnPanel, BorderLayout.SOUTH);
-
-        // Розрахунок ціни для початкового вибору
-        updatePrice();
+        return btnPanel;
     }
 
     // --- Допоміжні методи UI ---
@@ -299,14 +308,5 @@ public class OrderDialog extends JDialog {
         succeeded = true;
         JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId().substring(0, 8));
         dispose(); // Закриття вікна
-    }
-
-    /**
-     * Перевіряє, чи було успішно створено замовлення.
-     *
-     * @return true, якщо користувач натиснув "Підтвердити" і дані коректні.
-     */
-    public boolean isSucceeded() {
-        return succeeded;
     }
 }

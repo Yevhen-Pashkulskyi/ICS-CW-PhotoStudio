@@ -1,6 +1,7 @@
 package com.example.service;
 
 import java.io.Serializable;
+import lombok.*;
 
 /**
  * Клас-довідник, що описує типи доступних фотопослуг (наприклад, "Весільна", "Портретна").
@@ -8,6 +9,7 @@ import java.io.Serializable;
  * Використовується як частина об'єкта {@code Order} (принцип <b>композиції</b>).
  * Слугує джерелом даних для розрахунку базової вартості замовлення.
  */
+@Data
 public class SessionType implements Serializable {
 
     /**
@@ -32,23 +34,6 @@ public class SessionType implements Serializable {
     public SessionType(String name, double basePrice) {
         this.name = name;
         this.basePrice = basePrice;
-    }
-
-    /**
-     * Отримує назву послуги.
-     * @return рядок з назвою.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Отримує базову вартість послуги.
-     * Використовується методом {@code calculateTotalCost()} у класі Order.
-     * @return ціна (double).
-     */
-    public double getBasePrice() {
-        return basePrice;
     }
 
     /**

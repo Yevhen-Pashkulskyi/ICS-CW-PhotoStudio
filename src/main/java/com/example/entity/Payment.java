@@ -1,5 +1,7 @@
 package com.example.entity;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,28 +11,30 @@ import java.util.UUID;
  * Зберігає інформацію про проведені платежі, зв'язуючи їх з конкретним замовленням.
  * Створюється автоматично при виконанні сценарію оплати (ВВ2).
  */
+@EqualsAndHashCode()
+@Getter
 public class Payment implements Serializable {
 
     /**
      * Унікальний ідентифікатор транзакції (UUID).
      */
-    private String id;
+    private final String id;
 
     /**
      * Ідентифікатор замовлення, за яке проводиться оплата.
      * Використовується як зовнішній ключ для зв'язку з об'єктом Order.
      */
-    private String orderId;
+    private final String orderId;
 
     /**
      * Сума оплати у грошовому еквіваленті.
      */
-    private double amount;
+    private final double amount;
 
     /**
      * Дата та точний час проведення фінансової операції.
      */
-    private LocalDateTime paymentDate;
+    private final LocalDateTime paymentDate;
 
     /**
      * Конструктор для фіксації нового платежу.
@@ -45,32 +49,6 @@ public class Payment implements Serializable {
         this.amount = amount;
         this.paymentDate = LocalDateTime.now(); // Фіксуємо час створення об'єкта як час оплати
     }
-
-    // --- Геттери ---
-
-    /**
-     * Отримує унікальний ідентифікатор платежу.
-     * @return рядок з ID.
-     */
-    public String getId() { return id; }
-
-    /**
-     * Отримує ID замовлення, до якого відноситься цей платіж.
-     * @return рядок з ID замовлення.
-     */
-    public String getOrderId() { return orderId; }
-
-    /**
-     * Отримує суму транзакції.
-     * @return сума оплати (double).
-     */
-    public double getAmount() { return amount; }
-
-    /**
-     * Отримує дату та час проведення платежу.
-     * @return об'єкт LocalDateTime.
-     */
-    public LocalDateTime getPaymentDate() { return paymentDate; }
 
     /**
      * Повертає строкове представлення платежу для технічного логування.

@@ -19,10 +19,10 @@ import java.time.format.DateTimeFormatter;
 public class OrdersPanel extends JPanel {
 
     /** Посилання на центральний контролер даних. */
-    private DataManager dataManager;
+    private final DataManager dataManager;
 
     /** Модель таблиці, що зберігає дані про замовлення для відображення. */
-    private DefaultTableModel orderTableModel;
+    private final DefaultTableModel orderTableModel;
 
     /**
      * Конструктор панелі замовлень.

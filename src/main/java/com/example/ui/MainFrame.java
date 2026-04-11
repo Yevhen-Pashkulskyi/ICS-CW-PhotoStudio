@@ -26,20 +26,17 @@ import java.io.IOException;
 public class MainFrame extends JFrame {
 
     /** Посилання на центральний контролер даних. */
-    private DataManager dataManager;
-
-    /** Шлях до директорії для збереження файлів (поточна папка). */
-    private static final String DATA_DIR_PATH = "data";
+    private final DataManager dataManager;
 
     /** Панель-контейнер для відображення змінних екранів (карток). */
-    private JPanel contentPanel;
+    private final JPanel contentPanel;
 
     /** Менеджер компонування для перемикання екранів. */
-    private CardLayout cardLayout;
+    private final CardLayout cardLayout;
 
     // Зберігаємо прямі посилання на панелі, щоб мати змогу викликати їх методи (наприклад, оновлення таблиць)
-    private OrdersPanel ordersPanel;
-    private ClientsPanel clientsPanel;
+    private final OrdersPanel ordersPanel;
+    private final ClientsPanel clientsPanel;
 
     /**
      * Конструктор головного вікна.

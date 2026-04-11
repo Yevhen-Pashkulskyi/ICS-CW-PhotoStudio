@@ -1,5 +1,6 @@
 package com.example.service;
 
+import lombok.Data;
 import java.io.Serializable;
 
 /**
@@ -8,6 +9,7 @@ import java.io.Serializable;
  * Цей клас демонструє виконання вимоги курсової роботи щодо використання
  * <b>статичних даних</b> (keyword {@code static}).
  */
+@Data
 public class InventoryItem implements Serializable {
 
     /**
@@ -48,22 +50,6 @@ public class InventoryItem implements Serializable {
         if (amount > 0) {
             this.quantity += amount;
         }
-    }
-
-    /**
-     * Отримує назву матеріалу.
-     * @return рядок з назвою.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Отримує поточний залишок на складі.
-     * @return ціле число (кількість).
-     */
-    public int getQuantity() {
-        return quantity;
     }
 
     /**
