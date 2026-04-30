@@ -7,6 +7,7 @@ target/
 .kotlin
 .project_env
 .idea
+*.csv
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
