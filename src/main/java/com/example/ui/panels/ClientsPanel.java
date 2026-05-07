@@ -106,9 +106,9 @@ public class ClientsPanel extends JPanel {
             String name = nameField.getText().trim();
             String phone = phoneField.getText().trim();
             String email = emailField.getText().trim();
-            Utils utils = new Utils();
+            Validate validate = new Validate();
             // 1. Перевірка
-            if (utils.validate(name, phone, email)) return;
+            if (validate.validate(name, phone, email)) return;
 
             // 2. Перевірка на дублікати (використовує бізнес-логіку DataManager)
             if (dataManager.clientExists(phone, email)) {

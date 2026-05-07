@@ -6,7 +6,7 @@ import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
-import com.example.ui.panels.Utils;
+import com.example.ui.panels.Validate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -251,9 +251,9 @@ public class OrderDialog extends JDialog {
         String phone = clientPhoneField.getText().trim();
         String email = clientEmailField.getText().trim();
         // 1. Валідація
-        Utils utils = new Utils();
+        Validate validate = new Validate();
         // 1. Перевірка
-        if (utils.validate(name, phone, email)) return;
+        if (validate.validate(name, phone, email)) return;
 
         if (photographerBox.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "Оберіть фотографа!", "Помилка", JOptionPane.WARNING_MESSAGE);
