@@ -253,7 +253,7 @@ public class OrderDialog extends JDialog {
         // 1. Валідація
         Validate validate = new Validate();
         // 1. Перевірка
-        if (validate.validate(name, phone, email)) return;
+        if (validate.validateAll(name, phone, email)) return;
 
         if (photographerBox.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "Оберіть фотографа!", "Помилка", JOptionPane.WARNING_MESSAGE);

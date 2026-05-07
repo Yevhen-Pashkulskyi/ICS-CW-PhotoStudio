@@ -108,7 +108,7 @@ public class ClientsPanel extends JPanel {
             String email = emailField.getText().trim();
             Validate validate = new Validate();
             // 1. Перевірка
-            if (validate.validate(name, phone, email)) return;
+            if (validate.validateAll(name, phone, email)) return;
 
             // 2. Перевірка на дублікати (використовує бізнес-логіку DataManager)
             if (dataManager.clientExists(phone, email)) {
