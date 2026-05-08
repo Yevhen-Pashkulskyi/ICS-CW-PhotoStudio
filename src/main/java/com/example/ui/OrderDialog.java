@@ -6,7 +6,7 @@ import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
-import com.example.ui.panels.Validate;
+import com.example.ui.util.Validate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

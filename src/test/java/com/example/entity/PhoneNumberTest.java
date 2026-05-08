@@ -1,6 +1,6 @@
 package com.example.entity;
 
-import com.example.ui.panels.Validate;
+import com.example.ui.util.Validate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

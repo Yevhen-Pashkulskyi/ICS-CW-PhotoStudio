@@ -2,6 +2,7 @@ package com.example.ui.panels;
 
 import com.example.control.DataManager;
 import com.example.entity.Client;
+import com.example.ui.util.Validate;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
