@@ -6,6 +6,12 @@ import java.awt.*;
 public class Validate extends Component {
 
     public boolean validateAll(String name, String phone, String email) {
+
+        if (!nameValidate(name)) {
+            JOptionPane.showMessageDialog(this, "Невірне формат Ім'я");
+            return true;
+        }
+
         if (nameAndPhoneNotEmpty(name, phone)) {
             JOptionPane.showMessageDialog(this, "Ім'я та телефон обов'язкові!",
                     "Помилка", JOptionPane.ERROR_MESSAGE);
@@ -17,12 +23,16 @@ public class Validate extends Component {
             return true;
         }
 
-        if (!emailValidate(email)){
+        if (!emailValidate(email)) {
             JOptionPane.showMessageDialog(this, "Недійсний email", "Помилка",
                     JOptionPane.WARNING_MESSAGE);
             return true;
         }
-        return  false;
+        return false;
+    }
+
+    public boolean nameValidate(String name) {
+        return name.length() >= 2 && name.length() <= 20 && name.matches("[a-zA-Z]+");
     }
 
     public boolean nameAndPhoneNotEmpty(String name, String phone) {
@@ -30,7 +40,7 @@ public class Validate extends Component {
     }
 
     public boolean phoneValidate(String phone) {
-        return phone !=null && phone.matches("\\d+") && phone.length() == 10;
+        return phone != null && phone.matches("\\d+") && phone.length() == 10;
     }
 
     public boolean emailValidate(String email) {
