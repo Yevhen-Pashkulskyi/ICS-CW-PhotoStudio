@@ -14,27 +14,39 @@ public class NameTest {
         validate = new Validate();
     }
 
-    // 1 символ - замале
+    // 1 літера - замале
     @Test
-    void testNameMinInvalid() {
+    void testNameLength_1() {
         assertFalse(validate.nameValidate("A"));
     }
 
-    // 2 символи - норм
+    // 2 літери - норм
     @Test
-    void testNameMinValid() {
+    void testNameLength_2() {
         assertTrue(validate.nameValidate("An"));
     }
 
-    // 20 символів - норм
+    // 3 літери - норм
     @Test
-    void testNameMaxValid() {
+    void testNameLength_3() {
+        assertTrue(validate.nameValidate("Ann"));
+    }
+
+    // 19 літер - норм
+    @Test
+    void testNameLength_19() {
+        assertTrue(validate.nameValidate("ThisNameVeryVeryLon"));
+    }
+
+    // 20 літер - норм
+    @Test
+    void testNameLength_20() {
         assertTrue(validate.nameValidate("ThisNameVeryVeryLong"));
     }
 
-    // 21 символ - завелике
+    // 21 літера - завелике
     @Test
-    void testNameMaxInvalid() {
+    void testNameLength_21() {
         assertFalse(validate.nameValidate("ThisNameVeryVeryLongg"));
     }
 }
