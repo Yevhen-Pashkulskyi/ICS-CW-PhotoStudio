@@ -12,9 +12,10 @@ public class PhotographerDAO {
     public void savePhotographer(Photographer photographer) {
 
         String sql = """
-                insert into photographer(fullName, phone, specialization, baseRate)
-                values(?, ?, ?, ?, ?)
+                insert into photographer(full_name, phone, specialization, base_rate)
+                values(?, ?, ?, ?)
                 """;
+
         try(Connection connection = DataBaseConnection.getConnection();
             PreparedStatement psmt = connection.prepareStatement(sql)){
 
@@ -22,6 +23,9 @@ public class PhotographerDAO {
             psmt.setString(2, photographer.getPhone());
             psmt.setString(3, photographer.getSpecialization());
             psmt.setDouble(4, photographer.getBaseRate());
+
+            psmt.executeUpdate();
+            System.out.println("Фотографа збережено");
 
         }catch(SQLException e){
             System.err.println("Помилка при збереженні фотографа: " + e.getMessage());
@@ -33,10 +37,10 @@ public class PhotographerDAO {
         String sql = """
             create table if not exists photographer(
             id bigSerial primary key,
-            fullName varchar(255) not null,
+            full_name varchar(255) not null,
             phone varchar(255) not null,
             specialization varchar(255) not null,
-            baseRate decimal(5,2) not null);
+            base_rate decimal(5,2) not null);
         """;
     }
 }

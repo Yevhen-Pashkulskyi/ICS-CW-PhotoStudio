@@ -41,7 +41,7 @@ public class ClientDAO {
                 email varchar(255) ,
                 is_regular_client boolean not null,
                 discount_rate decimal(5,2) not null
-                ); 
+                );
                 """;
         try {} catch (Exception e) {
             throw new RuntimeException(e);

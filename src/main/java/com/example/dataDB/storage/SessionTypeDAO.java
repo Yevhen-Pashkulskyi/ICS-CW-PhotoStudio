@@ -15,24 +15,28 @@ public class SessionTypeDAO {
                 values (?, ?, ?)
                 """;
         try(Connection connection = DataBaseConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            PreparedStatement pstm = connection.prepareStatement(sql)){
 
-            preparedStatement.setString(1, sessionType.getSessionName());
+            pstm.setString(1, sessionType.getSessionName());
+            pstm.setLong(2,sessionType.getDuration_hours());
+            pstm.setDouble(3,sessionType.getPrice());
+
+            pstm.executeUpdate();
 
 
         }catch (SQLException e){
-            System.err.println("Помилка при збереженні фотографа: " + e.getMessage());
+            System.err.println("Помилка при збереженні сесії: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     private void createTableSessionType(){
         String sql = """
-                create table if not exist session_type (
-                session_id bigSerial primary key,
+                create table if not exists session_type (
+                id bigSerial primary key,
                 session_name varchar(255) not null,
                 durations_hours bigint not null,
-                price decimal(20, 2) not null
+                price decimal(20, 2) not null);
         """;
     }
 }
