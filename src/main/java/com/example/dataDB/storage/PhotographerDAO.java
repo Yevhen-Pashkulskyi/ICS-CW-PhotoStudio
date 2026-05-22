@@ -36,7 +36,7 @@ public class PhotographerDAO {
             fullName varchar(255) not null,
             phone varchar(255) not null,
             specialization varchar(255) not null,
-            baseRate decimal not null);
+            baseRate decimal(5,2) not null);
         """;
     }
 }
