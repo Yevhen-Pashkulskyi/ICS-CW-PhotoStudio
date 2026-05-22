@@ -20,7 +20,7 @@ public class SessionType implements Serializable {
     private String sessionName;
 
     // тривалість сесії в годинах
-    private int duration_hours; // питання краще мабуть long?
+    private int duration_hours;
 
     /**
      * Базова вартість послуги у гривнях.
