@@ -18,7 +18,7 @@ public class SessionTypeDAO {
             PreparedStatement pstm = connection.prepareStatement(sql)){
 
             pstm.setString(1, sessionType.getSessionName());
-            pstm.setLong(2,sessionType.getDurationHours());
+            pstm.setInt(2,sessionType.getDurationHours());
             pstm.setDouble(3,sessionType.getPrice());
 
             pstm.executeUpdate();
