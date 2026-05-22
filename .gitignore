@@ -8,7 +8,7 @@ target/
 .project_env
 .idea
 *.csv
-
+*.puml
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
