@@ -18,7 +18,7 @@ public class SessionTypeDAO {
             PreparedStatement pstm = connection.prepareStatement(sql)){
 
             pstm.setString(1, sessionType.getSessionName());
-            pstm.setLong(2,sessionType.getDuration_hours());
+            pstm.setLong(2,sessionType.getDurationHours());
             pstm.setDouble(3,sessionType.getPrice());
 
             pstm.executeUpdate();
@@ -35,7 +35,7 @@ public class SessionTypeDAO {
                 create table if not exists session_type (
                 id bigSerial primary key,
                 session_name varchar(255) not null,
-                durations_hours bigint not null,
+                durations_hours integer not null,
                 price decimal(20, 2) not null);
         """;
     }

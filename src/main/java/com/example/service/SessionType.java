@@ -12,7 +12,7 @@ import lombok.*;
 @Data
 public class SessionType implements Serializable {
 
-   private long id;
+   private Long id;
     /**
      * Назва типу фотосесії (наприклад, "Репортажна зйомка").
      * Ця назва відображається у випадаючих списках інтерфейсу.
@@ -20,7 +20,7 @@ public class SessionType implements Serializable {
     private String sessionName;
 
     // тривалість сесії в годинах
-    private int duration_hours;
+    private int durationHours;
 
     /**
      * Базова вартість послуги у гривнях.
@@ -33,12 +33,12 @@ public class SessionType implements Serializable {
      * Зазвичай викликається при ініціалізації системи (заповнення довідників).
      *
      * @param sessionName      Назва послуги.
-     * @param duration_hours   тривалість сесії
+     * @param durationHours   тривалість сесії
      * @param price Вартість послуги (грн).
      */
-    public SessionType(String sessionName,int duration_hours, double price) {
+    public SessionType(String sessionName, int durationHours, double price) {
         this.sessionName = sessionName;
-        this.duration_hours = duration_hours;
+        this.durationHours = durationHours;
         this.price = price;
     }
     /**
@@ -47,13 +47,13 @@ public class SessionType implements Serializable {
      *
      * @param id id сесії
      * @param sessionName      Назва послуги.
-     * @param duration_hours  тривалість сесії
+     * @param durationHours  тривалість сесії
      * @param price Вартість послуги (грн).
      */
-    public SessionType(long id, String sessionName,int duration_hours, double price) {
+    public SessionType(long id, String sessionName, int durationHours, double price) {
         this.id = id;
         this.sessionName = sessionName;
-        this.duration_hours = duration_hours;
+        this.durationHours = durationHours;
         this.price = price;
     }
 

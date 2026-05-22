@@ -50,7 +50,7 @@ public class Photographer extends Person implements Serializable {
      * @param phoneNumber    Контактний номер телефону.
      * @param specialization Напрямок діяльності (спеціалізація).
      */
-    public Photographer(long id, String name, String phoneNumber, String specialization, double baseRate) {
+    public Photographer(Long id, String name, String phoneNumber, String specialization, double baseRate) {
         super(id, name, phoneNumber); // Виклик конструктора базового класу Person
         this.specialization = specialization;
         this.baseRate = baseRate;
