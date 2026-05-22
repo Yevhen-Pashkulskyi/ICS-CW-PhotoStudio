@@ -12,28 +12,49 @@ import lombok.*;
 @Data
 public class SessionType implements Serializable {
 
+   private long id;
     /**
      * Назва типу фотосесії (наприклад, "Репортажна зйомка").
      * Ця назва відображається у випадаючих списках інтерфейсу.
      */
-    private String name;
+    private String sessionName;
+
+    // тривалість сесії в годинах
+    private int duration_hours; // питання краще мабуть long?
 
     /**
      * Базова вартість послуги у гривнях.
      * Це ціна до застосування будь-яких знижок (наприклад, для постійних клієнтів).
      */
-    private double basePrice;
+    private double price;
 
     /**
      * Конструктор для створення нового типу послуги.
      * Зазвичай викликається при ініціалізації системи (заповнення довідників).
      *
-     * @param name      Назва послуги.
-     * @param basePrice Вартість послуги (грн).
+     * @param sessionName      Назва послуги.
+     * @param duration_hours   тривалість сесії
+     * @param price Вартість послуги (грн).
      */
-    public SessionType(String name, double basePrice) {
-        this.name = name;
-        this.basePrice = basePrice;
+    public SessionType(String sessionName,int duration_hours, double price) {
+        this.sessionName = sessionName;
+        this.duration_hours = duration_hours;
+        this.price = price;
+    }
+    /**
+     * Конструктор для створення нового типу послуги.
+     * Зазвичай викликається при ініціалізації системи (заповнення довідників).
+     *
+     * @param id id сесії
+     * @param sessionName      Назва послуги.
+     * @param duration_hours  тривалість сесії
+     * @param price Вартість послуги (грн).
+     */
+    public SessionType(long id, String sessionName,int duration_hours, double price) {
+        this.id = id;
+        this.sessionName = sessionName;
+        this.duration_hours = duration_hours;
+        this.price = price;
     }
 
     /**
@@ -44,6 +65,6 @@ public class SessionType implements Serializable {
      */
     @Override
     public String toString() {
-        return name + " (" + basePrice + " грн)";
+        return sessionName + " (" + price + " грн)";
     }
 }

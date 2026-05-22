@@ -1,10 +1,12 @@
 package com.example.entity;
 
+import com.example.model.Order;
+import com.example.util.PaymentMethod;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Клас, що моделює фінансову транзакцію (оплату).
@@ -18,36 +20,40 @@ public class Payment implements Serializable {
     /**
      * Унікальний ідентифікатор транзакції (UUID).
      */
-    private final String id;
+    private final long id;
 
     /**
      * Ідентифікатор замовлення, за яке проводиться оплата.
      * Використовується як зовнішній ключ для зв'язку з об'єктом Order.
      */
-    private final String orderId;
+    private final Order orderId;
 
     /**
      * Сума оплати у грошовому еквіваленті.
      */
-    private final double amount;
+    private final double paymentAmount;
 
     /**
      * Дата та точний час проведення фінансової операції.
      */
-    private final LocalDateTime paymentDate;
+    private final Timestamp paymentDate;
+
+    private final PaymentMethod paymentMethod;
 
     /**
      * Конструктор для фіксації нового платежу.
      * Автоматично генерує унікальний ID транзакції та фіксує поточний час.
      *
      * @param orderId ID пов'язаного замовлення, яке оплачується.
-     * @param amount  Сума коштів, що була внесена клієнтом.
+     * @param paymentAmount  Сума коштів, що була внесена клієнтом.
      */
-    public Payment(String orderId, double amount) {
-        this.id = UUID.randomUUID().toString();
+    public Payment(long id, Order orderId, double paymentAmount) {
+        this.id = id;
+//        this.id = UUID.randomUUID().toString();
         this.orderId = orderId;
-        this.amount = amount;
-        this.paymentDate = LocalDateTime.now(); // Фіксуємо час створення об'єкта як час оплати
+        this.paymentAmount = paymentAmount;
+        this.paymentDate = Timestamp.valueOf(LocalDateTime.now()); // Фіксуємо час створення об'єкта як час оплати
+        this.paymentMethod = PaymentMethod.CARD;
     }
 
     /**
@@ -56,6 +62,6 @@ public class Payment implements Serializable {
      */
     @Override
     public String toString() {
-        return "Payment [ID=" + id + ", OrderID=" + orderId + ", Amount=" + amount + "]";
+        return "Payment [ID=" + id + ", OrderID=" + orderId + ", Amount=" + paymentAmount + "]";
     }
 }

@@ -19,6 +19,7 @@ public class Photographer extends Person implements Serializable {
      * Використовується для фільтрації списку при створенні замовлення.
      */
     private String specialization;
+    private double baseRate;
 
     /**
      * Особистий графік роботи фотографа.
@@ -34,9 +35,25 @@ public class Photographer extends Person implements Serializable {
      * @param phoneNumber    Контактний номер телефону.
      * @param specialization Напрямок діяльності (спеціалізація).
      */
-    public Photographer(String name, String phoneNumber, String specialization) {
+    public Photographer(String name, String phoneNumber, String specialization, double baseRate) {
         super(name, phoneNumber); // Виклик конструктора базового класу Person
         this.specialization = specialization;
+        this.baseRate = baseRate;
+        // Об'єкт розкладу створюється разом з фотографом (жорстка композиція)
+        this.schedule = new Schedule();
+    }
+    /**
+     * Конструктор для запису нового фотографа.
+     * Ініціалізує персональні дані та створює новий порожній розклад.
+     *
+     * @param name           ПІБ фотографа.
+     * @param phoneNumber    Контактний номер телефону.
+     * @param specialization Напрямок діяльності (спеціалізація).
+     */
+    public Photographer(long id, String name, String phoneNumber, String specialization, double baseRate) {
+        super(id, name, phoneNumber); // Виклик конструктора базового класу Person
+        this.specialization = specialization;
+        this.baseRate = baseRate;
         // Об'єкт розкладу створюється разом з фотографом (жорстка композиція)
         this.schedule = new Schedule();
     }
@@ -48,6 +65,6 @@ public class Photographer extends Person implements Serializable {
     @Override
     public String toString() {
         // Використовуємо метод getName() замість this, щоб уникнути рекурсії
-        return getName() + " [" + specialization + "]";
+        return getFullName() + " [" + specialization + "]";
     }
 }

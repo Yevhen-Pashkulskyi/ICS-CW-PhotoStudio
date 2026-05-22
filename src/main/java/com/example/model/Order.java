@@ -7,8 +7,10 @@ import com.example.util.OrderStatus;
 import com.example.service.SessionType;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
@@ -24,19 +26,11 @@ import lombok.*;
  * </ul>
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Order implements Serializable {
 
     /** Унікальний ідентифікатор замовлення (UUID). */
-    private String id;
-
-    /** Дата та час створення замовлення. */
-    private LocalDateTime orderDate;
-
-    /** Поточний статус виконання (наприклад, NEW, PAID). */
-    private OrderStatus status;
-
-    /** Фінальна вартість замовлення з урахуванням усіх знижок. */
-    private double totalCost;
+    private long id;
 
     /** Клієнт, який оформив замовлення. */
     private final Client client;
@@ -47,8 +41,25 @@ public class Order implements Serializable {
     /** Тип обраної фотосесії (містить назву та базову ціну). */
     private final SessionType sessionType;
 
+    /** Дата та час створення замовлення. */
+    private Timestamp createdDate;
+
+    private Timestamp eventDate;
+
+    private Timestamp deliveryDate;
+
+
+    /** Поточний статус виконання (наприклад, NEW, PAID). */
+    private OrderStatus status;
+
+    /** Фінальна вартість замовлення з урахуванням усіх знижок. */
+    private double totalCost;
+
+
+
+
     /** Список готових фотографій, прив'язаних до цього замовлення. */
-    private final List<Photo> photos;
+//    private final List<Photo> photos;
 
     /**
      * Конструктор для створення нового замовлення.
@@ -58,14 +69,16 @@ public class Order implements Serializable {
      * @param photographer Обраний фотограф.
      * @param sessionType  Тип послуги.
      */
-    public Order(Client client, Photographer photographer, SessionType sessionType) {
-        this.id = UUID.randomUUID().toString();
+    public Order(Client client, Photographer photographer, SessionType sessionType,
+                 Timestamp eventDate, Timestamp deliveryDate) {
         this.client = client;
         this.photographer = photographer;
         this.sessionType = sessionType;
-        this.orderDate = LocalDateTime.now();
+        this.createdDate = Timestamp.valueOf(LocalDateTime.now());
+        this.eventDate = eventDate;
+        this.deliveryDate = deliveryDate;
         this.status = OrderStatus.NEW; // Початковий статус завжди "Новий"
-        this.photos = new ArrayList<>(); // Ініціалізація порожнього списку для майбутніх фото
+//        this.photos = new ArrayList<>(); // Ініціалізація порожнього списку для майбутніх фото
         this.totalCost = calculateTotalCost(); // Автоматичний розрахунок ціни при створенні
     }
 
@@ -77,7 +90,7 @@ public class Order implements Serializable {
      * @return розрахована сума до сплати.
      */
     public double calculateTotalCost() {
-        double currentCost = sessionType.getBasePrice();
+        double currentCost = sessionType.getPrice();
         if (client.isRegular()) {
             currentCost *= 0.90; // Знижка 10%
         }
@@ -89,9 +102,9 @@ public class Order implements Serializable {
      * Повертає коротке строкове представлення замовлення для списків UI.
      * @return рядок у форматі "Замовлення [ID] | [Ім'я клієнта] | [Статус]".
      */
-    @Override
-    public String toString() {
-        // substring(0, 8) використовується для скорочення довгого UUID
-        return "Замовлення " + id.substring(0, 8) + " | " + client.getName() + " | " + status;
-    }
+//    @Override
+//    public String toString() {
+//        // substring(0, 8) використовується для скорочення довгого UUID
+//        return "Замовлення " + id.substring(0, 8) + " | " + client.getFullName() + " | " + status;
+//    }
 }

@@ -23,19 +23,40 @@ public class Client extends Person implements Serializable {
      */
     private boolean isRegular;
 
+    private double discountRate;
+
     /**
      * Конструктор для створення нового об'єкта клієнта.
      *
-     * @param name        Повне ім'я (ПІБ) клієнта.
-     * @param phoneNumber Контактний номер телефону.
+     * @param fullName        Повне ім'я (ПІБ) клієнта.
+     * @param phone Контактний номер телефону.
      * @param email       Адреса електронної пошти.
      * @param isRegular   Початковий статус (true - постійний, false - новий).
+     * @param discountRate
      */
-    public Client(String name, String phoneNumber, String email, boolean isRegular) {
-        super(name, phoneNumber); // Ініціалізація полів базового класу Person
+    public Client(String fullName, String phone, String email, boolean isRegular, double discountRate) {
+        super(fullName, phone); // Ініціалізація полів базового класу Person
         this.email = email;
         this.isRegular = isRegular;
+        this.discountRate = discountRate;
+    }/**
+     * Конструктор для створення нового об'єкта клієнта.
+     *
+     * @param id ідентифікатор в базі даних
+     * @param fullName        Повне ім'я (ПІБ) клієнта.
+     * @param phone Контактний номер телефону.
+     * @param email       Адреса електронної пошти.
+     * @param isRegular   Початковий статус (true - постійний, false - новий).
+     * @param discountRate % знижки
+     */
+    public Client(Long id, String fullName, String phone, String email, boolean isRegular, double discountRate) {
+        super(id, fullName, phone); // Ініціалізація полів базового класу Person
+        this.email = email;
+        this.isRegular = isRegular;
+        this.discountRate = discountRate;
     }
+
+
 
     /**
      * Повертає строкове представлення клієнта для відображення у списках.
