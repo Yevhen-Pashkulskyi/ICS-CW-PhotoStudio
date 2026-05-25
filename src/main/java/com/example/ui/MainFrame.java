@@ -1,16 +1,15 @@
 package com.example.ui;
 
-import com.example.control.DataManager;
+import com.example.control.DatabaseManager;
+import com.example.control.OrderController;
 import com.example.ui.panels.ClientsPanel;
 import com.example.ui.panels.DashboardPanel;
 import com.example.ui.panels.OrdersPanel;
 import com.example.ui.panels.ReportsPanel;
-import com.example.util.Constants;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * Головне вікно програми (Main Window).
@@ -26,7 +25,8 @@ import java.io.IOException;
 public class MainFrame extends JFrame {
 
     /** Посилання на центральний контролер даних. */
-    private final DataManager dataManager;
+    private final DatabaseManager databaseManager;
+    private final OrderController  orderController;
 
     /** Панель-контейнер для відображення змінних екранів (карток). */
     private final JPanel contentPanel;
@@ -51,7 +51,8 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
 
         // Ініціалізація логіки (завантаження даних відбувається всередині конструктора DataManager)
-        dataManager = new DataManager();
+        databaseManager = new DatabaseManager();
+        orderController = new OrderController(databaseManager);
 
         // Додавання бічного меню (ліва частина)
         add(createSidebar(), BorderLayout.WEST);
@@ -64,14 +65,14 @@ public class MainFrame extends JFrame {
 
         // Ініціалізація та додавання панелей
         // Ми створюємо їх тут, щоб передати DataManager
-        ordersPanel = new OrdersPanel(dataManager);
-        clientsPanel = new ClientsPanel(dataManager);
+        ordersPanel = new OrdersPanel(orderController);
+        clientsPanel = new ClientsPanel(orderController);
 
         // Додавання "карток" в CardLayout з унікальними іменами (ключами)
-        contentPanel.add(new DashboardPanel(this, dataManager), "DASHBOARD");
+        contentPanel.add(new DashboardPanel(this, orderController), "DASHBOARD");
         contentPanel.add(ordersPanel, "ORDERS");
         contentPanel.add(clientsPanel, "CLIENTS");
-        contentPanel.add(new ReportsPanel(dataManager), "REPORTS");
+        contentPanel.add(new ReportsPanel(orderController), "REPORTS");
 
         add(contentPanel, BorderLayout.CENTER);
     }
@@ -111,14 +112,14 @@ public class MainFrame extends JFrame {
         // Кнопка безпечного виходу
         JButton exitBtn = new JButton("Зберегти та Вийти");
         styleButton(exitBtn);
-        exitBtn.setBackground(new Color(255, 255, 255)); // Червоний відтінок
+        exitBtn.setBackground(new Color(220, 80, 80));
+        exitBtn.setForeground(Color.WHITE);
+
         exitBtn.addActionListener(e -> {
-            try {
-                dataManager.saveDataToFile(Constants.DIR);
-                JOptionPane.showMessageDialog(this, "Дані збережено!");
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Ви впевнені, що хочете закрити програму?", "Вихід", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
                 System.exit(0);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Помилка збереження: " + ex.getMessage());
             }
         });
         sidebar.add(exitBtn);
