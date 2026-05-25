@@ -1,19 +1,24 @@
 package com.example.ui;
 
-import com.example.control.DataManager;
+import com.example.control.DatabaseManager;
+import com.example.control.OrderController;
 import com.example.entity.Client;
 import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
 import com.example.ui.util.Validate;
+import com.example.util.OrderStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,7 +31,7 @@ import java.util.List;
  * <li>Вибору фотографа зі списку доступних.</li>
  * </ul>
  * При підтвердженні створює об'єкт {@link Order}, генерує тестові фотографії
- * та зберігає дані через {@link DataManager}.
+ * та зберігає дані через {@link DatabaseManager}.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -35,7 +40,7 @@ public class OrderDialog extends JDialog {
     /**
      * Посилання на центральний контролер даних.
      */
-    private final DataManager dataManager;
+    private final OrderController orderController;
 
     /**
      * Прапорець успішного завершення операції (true, якщо натиснуто "Підтвердити").
@@ -78,12 +83,12 @@ public class OrderDialog extends JDialog {
      * Конструктор діалогового вікна.
      * Ініціалізує розмітку, створює поля введення та заповнює списки даними.
      *
-     * @param parent      Батьківське вікно (для модальності).
-     * @param dataManager Екземпляр менеджера даних.
+     * @param parent          Батьківське вікно (для модальності).
+     * @param orderController Екземпляр менеджера даних.
      */
-    public OrderDialog(Frame parent, DataManager dataManager) {
+    public OrderDialog(Frame parent, OrderController orderController) {
         super(parent, "Створення нового замовлення", true); // true = модальне вікно
-        this.dataManager = dataManager;
+        this.orderController = orderController;
 
         setSize(450, 550);
         setLocationRelativeTo(parent); // Центрування відносно батьківського вікна
@@ -113,7 +118,7 @@ public class OrderDialog extends JDialog {
         // Вибір типу сесії
         mainPanel.add(new JLabel("Тип фотосесії:"));
         sessionTypeBox = new JComboBox<>();
-        fillSessionTypes(); // Завантаження з DataManager
+        fillSessionTypes();
 
         // Додавання слухача для оновлення ціни при зміні вибору
         sessionTypeBox.addActionListener(e -> updatePrice());
@@ -124,7 +129,7 @@ public class OrderDialog extends JDialog {
         // Вибір фотографа
         mainPanel.add(new JLabel("Фотограф:"));
         photographerBox = new JComboBox<>();
-        fillPhotographers(); // Завантаження з DataManager
+        fillPhotographers();
         mainPanel.add(photographerBox);
 
         mainPanel.add(Box.createVerticalStrut(20));
@@ -202,7 +207,7 @@ public class OrderDialog extends JDialog {
      * Заповнює випадаючий список типів сесій даними з DataManager.
      */
     private void fillSessionTypes() {
-        for (SessionType st : dataManager.getSessionTypes()) {
+        for (SessionType st : orderController.getSessionTypes()) {
             sessionTypeBox.addItem(st);
         }
     }
@@ -211,7 +216,7 @@ public class OrderDialog extends JDialog {
      * Заповнює випадаючий список фотографів даними з DataManager.
      */
     private void fillPhotographers() {
-        List<Photographer> list = dataManager.getPhotographers();
+        List<Photographer> list = orderController.getPhotographers();
         if (list.isEmpty()) {
             photographerBox.addItem(null);
         } else {
@@ -228,7 +233,7 @@ public class OrderDialog extends JDialog {
     private void updatePrice() {
         SessionType selected = (SessionType) sessionTypeBox.getSelectedItem();
         if (selected != null) {
-            priceLabel.setText("До сплати: " + selected.getBasePrice() + " грн");
+            priceLabel.setText("До сплати: " + selected.getPrice() + " грн");
         }
     }
 
@@ -264,7 +269,7 @@ public class OrderDialog extends JDialog {
         // Оскільки замовлення створюється на "зараз", перевіряємо поточний час
         LocalDateTime now = LocalDateTime.now();
         // Отримуємо список вільних фотографів на цей час
-        List<Photographer> freePhotographers = dataManager.getAvailablePhotographers(now);
+        List<Photographer> freePhotographers = orderController.getAvailablePhotographers(now);
         // Перевіряємо, чи є наш обраний фотограф у списку вільних
         // (порівнюємо за ID, щоб уникнути помилок посилань)
         boolean isBusy = freePhotographers.stream()
@@ -272,17 +277,18 @@ public class OrderDialog extends JDialog {
 
         if (isBusy) {
             JOptionPane.showMessageDialog(this,
-                    "Увага! Фотограф " + selectedPhotographer.getName() + " зараз зайнятий іншим замовленням.\nОберіть іншого фахівця або спробуйте пізніше.",
+                    "Увага! Фотограф " + selectedPhotographer.getFullName() +
+                            " зараз зайнятий іншим замовленням.\nОберіть іншого фахівця або спробуйте пізніше.",
                     "Фотограф зайнятий",
                     JOptionPane.ERROR_MESSAGE);
             return; // Зупиняємо процес, замовлення НЕ створюється
         }
         // 2. Пошук або створення клієнта (через DataManager!)
-        Client client = dataManager.findClientByPhone(phone);
+        Client client = orderController.findClient(phone);
 
         if (client == null) {
-            client = new Client(clientNameField.getText(), phone, email, false);
-            dataManager.addClient(client);
+            client = new Client(name, phone, email, false, 0.0);
+            orderController.addClient(client);
         }
 
         // 3. Отримання обраних об'єктів
@@ -290,23 +296,28 @@ public class OrderDialog extends JDialog {
         Photographer photographer = (Photographer) photographerBox.getSelectedItem();
 
         // 4. Створення замовлення
-        Order order = new Order(client, photographer, session);
+        Order order = new Order(client, photographer, session, Timestamp.valueOf(now),
+                null);
 
-        // Імітація процесу зйомки: генеруємо випадкову кількість фото від 3 до 10
+        // Імітація процесу зйомки: генеруємо випадкову кількість фото від 3 до 10. Це поки але я створю надалі папку і там будуть реальні фото
         int photoCount = 3 + (int) (Math.random() * 8);
 
+        List<String> fakePhotosPaths= new ArrayList<>();
         for (int i = 1; i <= photoCount; i++) {
-            // Генеруємо випадкову назву файлу
             String fileName = "IMG_" + (1000 + (int) (Math.random() * 9000)) + ".JPG";
-            // Додаємо об'єкт Photo у список замовлення
-            order.getPhotos().add(new Photo(fileName));
+            fakePhotosPaths.add(fileName);
         }
 
-        // Збереження в систему
-        dataManager.addOrder(order);
+        try {
+            // Збереження в систему
+            orderController.finalizeOrder(order, fakePhotosPaths);
+            succeeded = true;
+            JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId());
+            dispose(); // Закриття вікна
+        }catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Помилка при збереженні замовлення: " + e.getMessage(),
+                    "Помилка БД", JOptionPane.ERROR_MESSAGE);
+        }
 
-        succeeded = true;
-        JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId().substring(0, 8));
-        dispose(); // Закриття вікна
     }
 }

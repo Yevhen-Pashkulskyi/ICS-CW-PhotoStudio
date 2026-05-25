@@ -1,6 +1,7 @@
 package com.example.ui.panels;
 
-import com.example.control.DataManager;
+import com.example.control.OrderController;
+import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.util.OrderStatus;
@@ -11,6 +12,8 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import java.util.List;
+
 /**
  * Панель графічного інтерфейсу для модуля аналітики та звітності.
  * <p>
@@ -20,10 +23,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class ReportsPanel extends JPanel {
 
-    /** Посилання на контролер даних для отримання статистики. */
-    private final DataManager dataManager;
-
-    /** Текстова область для відображення згенерованих звітів. */
+    private final OrderController orderController;
     private final JTextArea reportArea;
 
     /**
@@ -31,10 +31,10 @@ public class ReportsPanel extends JPanel {
      * Налаштовує розділений екран (JSplitPane), створює кнопки для кожного типу звіту
      * та прив'язує їх до відповідних методів обробки.
      *
-     * @param dataManager екземпляр менеджера даних.
+     * @param orderController екземпляр менеджера даних.
      */
-    public ReportsPanel(DataManager dataManager) {
-        this.dataManager = dataManager;
+    public ReportsPanel(OrderController orderController) {
+        this.orderController = orderController;
         setLayout(new BorderLayout());
 
         // Заголовок панелі
@@ -94,12 +94,15 @@ public class ReportsPanel extends JPanel {
      */
     private void reportActiveOrders() {
         StringBuilder sb = new StringBuilder("=== АКТИВНІ ЗАМОВЛЕННЯ ===\n\n");
-        sb.append("Кількість: ").append(dataManager.getActiveOrdersCount()).append("\n");
+        sb.append("Кількість: ").append(orderController.getActiveOrdersCount()).append("\n");
+        sb.append(String.format("%-10s | %-15s | %-20s\n", "ID", "Статус", "Клієнт"));
+        sb.append("--------------------------------------------------\n");
 
         // Використання Stream API для фільтрації та форматування
-        dataManager.getOrders().stream()
+        orderController.getOrders().stream()
                 .filter(o -> o.getStatus() == OrderStatus.NEW || o.getStatus() == OrderStatus.IN_PROGRESS)
-                .forEach(o -> sb.append(o.getId().substring(0,8)).append(" - ").append(o.getStatus()).append("\n"));
+                .forEach(o -> sb.append(String.format("%-10d | %-15s | %-20s\n",
+                        o.getId(), o.getStatus(), o.getClient().getFullName())));
 
         reportArea.setText(sb.toString());
     }
@@ -109,8 +112,12 @@ public class ReportsPanel extends JPanel {
      * Порівнює кількість нових та постійних клієнтів.
      */
     private void reportClients() {
-        reportArea.setText("Постійних: " + dataManager.getRegularClientsCount() +
-                "\nНових: " + dataManager.getNewClientsCount());
+        StringBuilder sb = new StringBuilder("=== СТАТИСТИКА БАЗИ КЛІЄНТІВ ===\n\n");
+        sb.append("Постійні клієнти (мають знижку): ").append(orderController.getRegularClientsCount()).append("\n");
+        sb.append("Нові клієнти (базовий тариф):   ").append(orderController.getNewClientsCount()).append("\n");
+        sb.append("--------------------------------------------------\n");
+        sb.append("Всього зареєстровано в базі:     ").append(orderController.getClients().size());
+        reportArea.setText(sb.toString());
     }
 
     /**
@@ -121,15 +128,14 @@ public class ReportsPanel extends JPanel {
         LocalDateTime now = LocalDateTime.now();
 
         // Отримуємо список тих, хто вільний прямо зараз
-        java.util.List<Photographer> freePhotographers = dataManager.getAvailablePhotographers(now);
+        List<Photographer> freePhotographers = orderController.getAvailablePhotographers(now);
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== ЗАПИТ 3: ФОТОГРАФИ ТА СТАТУС ===\n");
+        StringBuilder sb = new StringBuilder("=== МОНІТОРИНГ ЗАЙНЯТОСТІ ФОТОГРАФІВ ===\n");
         sb.append("Станом на: ").append(now.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).append("\n");
-        sb.append("Всього фотографів: ").append(dataManager.getPhotographersCount()).append("\n\n");
+        sb.append("Всього фотографів: ").append(orderController.getPhotographers().size()).append("\n\n");
 
-        for (Photographer p : dataManager.getPhotographers()) {
-            sb.append("• ").append(p.getName()).append(" (").append(p.getSpecialization()).append(")");
+        for (Photographer p : orderController.getPhotographers()) {
+            sb.append("• ").append(p.getFullName()).append(" (").append(p.getSpecialization()).append(")");
 
             // Перевіряємо, чи є цей фотограф у списку вільних
             // Порівнюємо за ID, щоб було надійно
@@ -152,20 +158,34 @@ public class ReportsPanel extends JPanel {
      * та виводить список прив'язаних файлів.
      */
     private void reportPhotos() {
-        String id = JOptionPane.showInputDialog(this, "ID замовлення:");
-        if (id == null) return; // Користувач натиснув Cancel
+        String input = JOptionPane.showInputDialog(this, "ID замовлення:");
+        if (input == null || input.trim().isEmpty()) return; // Користувач натиснув Cancel
+        try {
+            long orderId = Long.parseLong(input);
+            // Пошук замовлення (підтримується введення неповного ID)
+            Order order = orderController.getOrders().stream()
+                    .filter(o -> o.getId() == orderId)
+                    .findFirst().orElse(null);
 
-        // Пошук замовлення (підтримується введення неповного ID)
-        Order order = dataManager.getOrders().stream()
-                .filter(o -> o.getId().startsWith(id))
-                .findFirst().orElse(null);
+            if (order != null) {
+                StringBuilder sb = new StringBuilder("АРХІВ СВІТЛИН ЗАМОВЛЕННЯ №").append(order.getId()).append("\n");
+                sb.append("Клієнт: ").append(order.getClient().getFullName()).append("\n");
+                sb.append("Шлях до хмарного сховища файлів:\n");
+                sb.append("--------------------------------------------------\n");
+                List<Photo> photos = orderController.getPhotosForOrder(orderId);
 
-        if (order != null) {
-            StringBuilder sb = new StringBuilder("Фото для ").append(order.getId()).append("\n");
-            dataManager.getPhotosForOrder(order.getId()).forEach(p -> sb.append(p.getFilePath()).append("\n"));
-            reportArea.setText(sb.toString());
-        } else {
-            reportArea.setText("Замовлення не знайдено.");
+                if (photos.isEmpty()) {
+                    sb.append("[Альбом порожній] Світлини ще не завантажені фотографом.");
+                } else {
+                    photos.forEach(p -> sb.append("📂 ").append(p.getFilePath()).append("\n"));
+                }
+                reportArea.setText(sb.toString());
+            } else {
+                reportArea.setText("Замовлення №" + orderId + " не знайдено в системі.");
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Помилка: ID повинен бути числовим значенням!",
+                    "Некоректний ввід", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -174,8 +194,11 @@ public class ReportsPanel extends JPanel {
      * Розраховує сумарний дохід за весь період існування системи.
      */
     private void reportRevenue() {
-        reportArea.setText("Загальний дохід: " +
-                dataManager.getTotalRevenueForPeriod(LocalDateTime.MIN, LocalDateTime.MAX) + " грн");
+        double totalRevenue = orderController.getTotalRevenue();
+        StringBuilder sb = new StringBuilder("=== ФІНАНСОВИЙ АНАЛІТИЧНИЙ ЗВІТ ===\n\n");
+        sb.append("Загальна каса фотостудії (всі оплачені ордери):\n");
+        sb.append("💰 ").append(String.format("%.2f", totalRevenue)).append(" грн\n");
+        reportArea.setText(sb.toString());
     }
 
     /**
@@ -183,6 +206,9 @@ public class ReportsPanel extends JPanel {
      * Аналізує історію замовлень та визначає найпопулярнішу послугу.
      */
     private void reportPopularType() {
-        reportArea.setText("Популярна: " + dataManager.getMostPopularSessionType().orElse("-"));
+        StringBuilder sb = new StringBuilder("=== МАРКЕТИНГОВИЙ АНАЛІЗ ПОПИТУ ===\n\n");
+        sb.append("Найбільш затребуваний тип фотосесії:\n");
+        sb.append("⭐ ").append(orderController.getMostPopularSessionType().orElse("Дані відсутні (немає замовлень)")).append("\n");
+        reportArea.setText(sb.toString());
     }
 }

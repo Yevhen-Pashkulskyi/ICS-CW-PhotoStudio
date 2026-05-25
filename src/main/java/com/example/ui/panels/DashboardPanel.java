@@ -1,6 +1,6 @@
 package com.example.ui.panels;
 
-import com.example.control.DataManager;
+import com.example.control.OrderController;
 import com.example.ui.OrderDialog;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class DashboardPanel extends JPanel {
      * Посилання на контролер даних.
      * Передається далі у діалогові вікна для збереження нових замовлень.
      */
-    private final DataManager dataManager;
+    private final OrderController orderController;
 
     /**
      * Конструктор панелі Dashboard.
@@ -34,11 +34,11 @@ public class DashboardPanel extends JPanel {
      * по центру екрану.
      *
      * @param parentFrame посилання на головне вікно програми.
-     * @param dataManager екземпляр менеджера даних.
+     * @param orderController екземпляр менеджера даних.
      */
-    public DashboardPanel(JFrame parentFrame, DataManager dataManager) {
+    public DashboardPanel(JFrame parentFrame, OrderController orderController) {
         this.parentFrame = parentFrame;
-        this.dataManager = dataManager;
+        this.orderController = orderController;
         setLayout(new BorderLayout());
 
         // Робимо панель прозорою, щоб було видно фон батьківського контейнера (якщо є)
@@ -78,7 +78,7 @@ public class DashboardPanel extends JPanel {
      */
     private void openOrderDialog() {
         // Валідація передумов (Pre-condition check)
-        if (dataManager.getPhotographers().isEmpty()) {
+        if (orderController.getPhotographers().isEmpty()) {
             JOptionPane.showMessageDialog(parentFrame,
                     "Спочатку додайте фотографів у систему (вкладка 'Управління' або програмно)!",
                     "Увага",
@@ -87,7 +87,7 @@ public class DashboardPanel extends JPanel {
         }
 
         // Створення та відображення діалогу
-        OrderDialog dialog = new OrderDialog(parentFrame, dataManager);
+        OrderDialog dialog = new OrderDialog(parentFrame, orderController);
         dialog.setVisible(true);
     }
 }

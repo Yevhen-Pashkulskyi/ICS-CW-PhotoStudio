@@ -1,8 +1,7 @@
 package com.example.entity;
 
+import com.example.model.Order;
 import lombok.Data;
-import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * Клас, що репрезентує окрему фотографію в межах замовлення.
@@ -10,36 +9,37 @@ import java.util.UUID;
  * Використовується у списку фотографій об'єкта Order (композиція).
  */
 @Data
-public class Photo implements Serializable {
+public class Photo {//implements Serializable {
 
-    /**
-     * Унікальний ідентифікатор фотографії.
-     */
-    private String id;
+    private Long id;
 
     /**
      * Шлях до файлу зображення або його назва у файловій системі.
      */
     private String filePath;
+    private Long orderId;
 
     /**
      * Конструктор для створення нового об'єкта фотографії.
-     * Автоматично генерує унікальний ідентифікатор (UUID).
      *
      * @param filePath шлях до файлу або назва файлу.
+     * @param orderId    для визначення ід ордера
      */
-    public Photo(String filePath) {
-        this.id = UUID.randomUUID().toString();
+    public Photo(String filePath, Long orderId) {
         this.filePath = filePath;
+        this.orderId = orderId;
     }
 
     /**
-     * Повертає строкове представлення об'єкта фотографії.
-     * Зручно для логування та налагодження.
-     * @return рядок у форматі "Photo[ID=..., Path=...]".
+     * Конструктор для зчитування об'єкта фотографії.
+     *
+     * @param id       ід фото
+     * @param filePath шлях до файлу або назва файлу.
+     * @param orderId для визначення ід ордера
      */
-    @Override
-    public String toString() {
-        return "Photo[ID=" + id + ", Path=" + filePath + "]";
+    public Photo(Long id, String filePath, Long orderId) {
+        this.id = id;
+        this.filePath = filePath;
+        this.orderId = orderId;
     }
 }

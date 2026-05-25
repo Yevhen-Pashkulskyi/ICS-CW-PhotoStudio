@@ -2,7 +2,6 @@ package com.example.entity;
 
 import lombok.Data;
 import java.io.Serializable;
-import java.util.UUID;
 
 /**
  * Абстрактний базовий клас для всіх персон у системі (клієнтів, фотографів).
@@ -16,31 +15,44 @@ public abstract class Person implements Serializable {
      * Унікальний ідентифікатор особи (UUID).
      * Генерується автоматично при створенні нового об'єкта або відновлюється з файлу.
      */
-    protected String id;
+    protected Long id;
 
     /**
      * Повне ім'я (ПІБ) особи.
      */
-    protected String name;
+    protected String fullName;
 
     /**
      * Контактний номер телефону.
      * Використовується як один з критеріїв пошуку та ідентифікації.
      */
-    protected String phoneNumber;
+    protected String phone;
 
     /**
      * Конструктор для ініціалізації базових полів особи.
      * Автоматично генерує унікальний ID.
      *
-     * @param name        Ім'я особи.
-     * @param phoneNumber Контактний номер телефону.
+     * @param fullName        Ім'я особи.
+     * @param phone Контактний номер телефону.
      */
-    public Person(String name, String phoneNumber) {
+    public Person(String fullName, String phone) {
         // Автоматична генерація унікального ID за допомогою UUID
-        this.id = UUID.randomUUID().toString();
-        this.name = name;
-        this.phoneNumber = phoneNumber;
+//        this.id = UUID.randomUUID().toString();
+        this.fullName = fullName;
+        this.phone = phone;
+    }
+    /**
+     * Конструктор для ініціалізації базових полів особи.
+     * Автоматично генерує унікальний ID.
+     *
+     * @param fullName        Ім'я особи.
+     * @param phone Контактний номер телефону.
+     */
+    public Person(Long id, String fullName, String phone) {
+        // Автоматична генерація унікального ID за допомогою UUID
+        this.id = id;
+        this.fullName = fullName;
+        this.phone = phone;
     }
 
     /**
@@ -51,6 +63,6 @@ public abstract class Person implements Serializable {
      */
     @Override
     public String toString() {
-        return name + " ( тел: " + phoneNumber + ")";
+        return fullName + " ( тел: " + phone + ")";
     }
 }

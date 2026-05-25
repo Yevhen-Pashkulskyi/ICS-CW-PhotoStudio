@@ -50,7 +50,7 @@ public class SessionType implements Serializable {
      * @param durationHours  тривалість сесії
      * @param price Вартість послуги (грн).
      */
-    public SessionType(long id, String sessionName, int durationHours, double price) {
+    public SessionType(Long id, String sessionName, int durationHours, double price) {
         this.id = id;
         this.sessionName = sessionName;
         this.durationHours = durationHours;

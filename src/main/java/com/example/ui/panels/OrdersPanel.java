@@ -1,6 +1,7 @@
 package com.example.ui.panels;
 
-import com.example.control.DataManager;
+import com.example.control.DatabaseManager;
+import com.example.control.OrderController;
 import com.example.entity.Payment;
 import com.example.model.Order;
 import com.example.util.OrderStatus;
@@ -19,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 public class OrdersPanel extends JPanel {
 
     /** Посилання на центральний контролер даних. */
-    private final DataManager dataManager;
+    private final OrderController orderController;
 
     /** Модель таблиці, що зберігає дані про замовлення для відображення. */
     private final DefaultTableModel orderTableModel;
@@ -29,10 +30,10 @@ public class OrdersPanel extends JPanel {
      * Налаштовує макет (Layout), створює таблицю з нередагованими клітинками
      * та панель інструментів для дій над замовленнями.
      *
-     * @param dataManager екземпляр менеджера даних.
+     * @param orderController екземпляр менеджера даних.
      */
-    public OrdersPanel(DataManager dataManager) {
-        this.dataManager = dataManager;
+    public OrdersPanel(OrderController orderController) {
+        this.orderController = orderController;
         setLayout(new BorderLayout());
 
         // Верхня панель: Заголовок та кнопка оновлення
@@ -91,13 +92,13 @@ public class OrdersPanel extends JPanel {
         orderTableModel.setRowCount(0); // Очищення таблиці
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        for (Order o : dataManager.getOrders()) {
+        for (Order o : orderController.getOrders()) {
             Object[] row = {
-                    o.getId().substring(0, 6), // Скорочений ID
-                    o.getOrderDate().format(formatter),
-                    o.getClient().getName(),
-                    o.getSessionType().getName(),
-                    o.getPhotographer().getName(),
+                    o.getId(),
+                    o.getCreatedDate().toLocalDateTime().format(formatter),
+                    o.getClient().getFullName(),
+                    o.getSessionType().getSessionName(),
+                    o.getPhotographer().getFullName(),
                     o.getStatus(),
                     o.getTotalCost() + " грн"
             };
@@ -130,8 +131,19 @@ public class OrdersPanel extends JPanel {
             return;
         }
 
-        // Отримання об'єкта замовлення зі списку (за індексом рядка)
-        Order selectedOrder = dataManager.getOrders().get(selectedRow);
+        // БЕЗПЕЧНО: Беремо ID прямо з першої колонки (індекс 0) обраного рядка
+        long orderId = (long) table.getValueAt(selectedRow, 0);
+
+        // Шукаємо замовлення у списку за його унікальним ID
+        Order selectedOrder = orderController.getOrders().stream()
+                .filter(o -> o.getId() == orderId)
+                .findFirst()
+                .orElse(null);
+
+        if (selectedOrder == null) {
+            JOptionPane.showMessageDialog(this, "Замовлення не знайдено!", "Помилка", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         // Перевірка бізнес-правила: не можна платити двічі
         if (selectedOrder.getStatus() == OrderStatus.PAID) {
@@ -143,24 +155,24 @@ public class OrdersPanel extends JPanel {
                 "Прийняти оплату " + selectedOrder.getTotalCost() + " грн?", "Оплата", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // 1. Ставимо статус ОПЛАЧЕНО
-            selectedOrder.setStatus(OrderStatus.PAID);
 
-            // 2. Фіксуємо факт платежу (створення об'єкта)
-            new Payment(selectedOrder.getId(), selectedOrder.getTotalCost());
+            try{
+                // Делегуємо всю роботу контролеру (збереження статусу, транзакція оплати, лояльність)
+                orderController.completeOrderPayment(selectedOrder);
 
-            // 3. === БІЗНЕС-ЛОГІКА: Перевірка на підвищення статусу клієнта ===
-            dataManager.checkAndUpgradeClient(selectedOrder.getClient());
+                // 4. Оновлюємо інтерфейс
+                refreshTable();
 
-            // 4. Оновлюємо інтерфейс
-            refreshTable();
-
-            // Інформування користувача про результат
-            if (selectedOrder.getClient().isRegular()) {
-                JOptionPane.showMessageDialog(this,
-                        "Оплата успішна!\nУВАГА: Цей клієнт досяг 3-х замовлень і отримав статус 'Постійний'!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Оплата успішна!");
+                // Інформування користувача про результат
+                if (selectedOrder.getClient().isRegular()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Оплата успішна!\nУВАГА: Цей клієнт досяг 3-х замовлень і отримав статус 'Постійний'!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Оплата успішна!");
+                }
+            }catch (Exception e){
+                JOptionPane.showMessageDialog(this, "Помилка при проведенні оплати: " + e.getMessage(),
+                        "Помилка БД", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

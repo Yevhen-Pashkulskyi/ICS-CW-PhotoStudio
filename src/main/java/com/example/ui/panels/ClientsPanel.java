@@ -1,6 +1,7 @@
 package com.example.ui.panels;
 
-import com.example.control.DataManager;
+import com.example.control.DatabaseManager;
+import com.example.control.OrderController;
 import com.example.entity.Client;
 import com.example.ui.util.Validate;
 
@@ -17,9 +18,9 @@ import java.awt.*;
 public class ClientsPanel extends JPanel {
 
     /**
-     * Посилання на центральний контролер даних.
+     * Посилання на центральний контролер даних.gftr45
      */
-    private final DataManager dataManager;
+    private final OrderController orderController;
 
     /**
      * Модель даних для таблиці, що дозволяє динамічно оновлювати рядки.
@@ -30,10 +31,10 @@ public class ClientsPanel extends JPanel {
      * Конструктор панелі клієнтів.
      * Ініціалізує візуальні компоненти (кнопки, таблицю) та наповнює їх даними.
      *
-     * @param dataManager екземпляр менеджера даних для доступу до списку клієнтів.
+     * @param orderController екземпляр менеджера даних для доступу до списку клієнтів.
      */
-    public ClientsPanel(DataManager dataManager) {
-        this.dataManager = dataManager;
+    public ClientsPanel(OrderController orderController) {
+        this.orderController = orderController;
         setLayout(new BorderLayout());
 
         // Верхня панель з заголовком та кнопками
@@ -54,8 +55,14 @@ public class ClientsPanel extends JPanel {
         add(topPanel, BorderLayout.NORTH);
 
         // Налаштування таблиці
-        String[] columns = {"ID", "Ім'я", "Телефон", "Email", "Статус"};
-        clientTableModel = new DefaultTableModel(columns, 0);
+        String[] columns = {"ID", "Ім'я", "Телефон", "Email", "Статус", "Знижка"};
+        clientTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Робимо таблицю тільки для читання
+            }
+        };
+
         JTable table = new JTable(clientTableModel);
         table.setRowHeight(25);
         table.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -73,13 +80,14 @@ public class ClientsPanel extends JPanel {
      */
     public void refreshTable() {
         clientTableModel.setRowCount(0); // Очищення таблиці
-        for (Client c : dataManager.getClients()) {
-            Object[] row = {
-                    c.getId().substring(0, 8) + "...", // Скорочений ID для зручності
-                    c.getName(),
-                    c.getPhoneNumber(),
+        for (Client c : orderController.getClients()) {
+            Object[] row = { // мені здається що масив даних запонен не до кінця але ти мене поправ якщо я не прав?
+                    c.getId(),
+                    c.getFullName(),
+                    c.getPhone(),
                     c.getEmail(),
-                    c.isRegular() ? "Постійний" : "Новий" // Текстове представлення статусу
+                    c.isRegular() ? "Постійний" : "Новий", // Текстове представлення статусу
+                    c.getDiscountRate() + " %"
             };
             clientTableModel.addRow(row);
         }
@@ -112,7 +120,7 @@ public class ClientsPanel extends JPanel {
             if (validate.validateAll(name, phone, email)) return;
 
             // 2. Перевірка на дублікати (використовує бізнес-логіку DataManager)
-            if (dataManager.clientExists(phone, email)) {
+            if (orderController.findClient(phone) != null) {
                 JOptionPane.showMessageDialog(this,
                         "Клієнт з таким номером телефону або Email вже існує!",
                         "Дублювання даних",
@@ -120,13 +128,16 @@ public class ClientsPanel extends JPanel {
                 return; // Зупиняємо створення, щоб уникнути колізій
             }
 
-            // 3. Якщо все ок — створюємо об'єкт та зберігаємо
-            Client newClient = new Client(name, phone, email, false);
-            dataManager.addClient(newClient);
-            refreshTable(); // Оновлюємо таблицю, щоб показати нового клієнта
-            JOptionPane.showMessageDialog(this, "Клієнт успішно доданий!");
+            try{
+                // 3. Якщо все ок — створюємо об'єкт та зберігаємо
+                Client newClient = new Client(name, phone, email, false,0.0);
+                orderController.addClient(newClient);
+                refreshTable(); // Оновлюємо таблицю, щоб показати нового клієнта
+                JOptionPane.showMessageDialog(this, "Клієнт успішно доданий!");
+            }catch(Exception e){
+                JOptionPane.showMessageDialog(this, "Помилка додавання клієнта: " + e.getMessage(),
+                        "Помилка БД", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
-
-
 }
