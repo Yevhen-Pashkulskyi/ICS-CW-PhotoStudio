@@ -89,7 +89,7 @@ public class Order implements Serializable {
      *
      * @return розрахована сума до сплати.
      */
-    public double calculateTotalCost() {
+    private double calculateTotalCost() {
         double currentCost = sessionType.getPrice();
         if (client.isRegular()) {
             currentCost *= 0.90; // Знижка 10%
