@@ -97,14 +97,4 @@ public class Order implements Serializable {
         this.totalCost = currentCost;
         return totalCost;
     }
-
-    /**
-     * Повертає коротке строкове представлення замовлення для списків UI.
-     * @return рядок у форматі "Замовлення [ID] | [Ім'я клієнта] | [Статус]".
-     */
-//    @Override
-//    public String toString() {
-//        // substring(0, 8) використовується для скорочення довгого UUID
-//        return "Замовлення " + id.substring(0, 8) + " | " + client.getFullName() + " | " + status;
-//    }
 }
