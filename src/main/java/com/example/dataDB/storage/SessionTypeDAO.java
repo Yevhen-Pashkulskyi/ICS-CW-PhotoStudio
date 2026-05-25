@@ -3,9 +3,9 @@ package com.example.dataDB.storage;
 import com.example.dataDB.DataBaseConnection;
 import com.example.service.SessionType;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SessionTypeDAO {
 
@@ -30,7 +30,32 @@ public class SessionTypeDAO {
         }
     }
 
-    private void createTableSessionType(){
+    public List<SessionType> getSessionType() {
+        List<SessionType> sessionTypeList = new ArrayList<>();
+        String sql = """
+                select * from session_type;
+        """;
+        try (Connection connection = DataBaseConnection.getConnection();
+        PreparedStatement pstm = connection.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery()){
+            while (rs.next()) {
+                SessionType st = new SessionType(
+                        rs.getString("session_name"),
+                        rs.getInt("durations_hours"),
+                        rs.getDouble("price")
+                );
+                st.setId(rs.getLong("id"));
+                sessionTypeList.add(st);
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return   sessionTypeList;
+    }
+
+    public void createTableSessionType(){
         String sql = """
                 create table if not exists session_type (
                 id bigSerial primary key,
@@ -38,5 +63,14 @@ public class SessionTypeDAO {
                 durations_hours integer not null,
                 price decimal(20, 2) not null);
         """;
+        try(Connection connection = DataBaseConnection.getConnection();
+            Statement stmt = connection.createStatement()){
+
+            stmt.execute(sql);
+            System.out.println("Таблиця створена");
+        }catch (SQLException e){
+            System.err.println("Помилка при створенні таблиці: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
