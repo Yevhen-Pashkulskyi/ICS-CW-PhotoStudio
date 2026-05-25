@@ -79,14 +79,14 @@ public class DataManagerTest {
 
     @Test
     public void testClientUpgradeLogic() {
-        Client c = new Client("Loyal One", "999", "mail", false);
+        Client c = new Client("Loyal One", "999", "mail", false,0.0);
         dataManager.addClient(c);
-        Photographer p = new Photographer("P", "1", "S");
-        SessionType s = new SessionType("S", 100);
+        Photographer p = new Photographer("P", "1", "S",0.0);
+        SessionType s = new SessionType(1,"S",1, 100);
 
         // Створюємо 3 замовлення і оплачуємо їх
         for (int i = 0; i < 3; i++) {
-            Order o = new Order(c, p, s);
+            Order o = new Order(c, p, s,LocalDateTime.now(),);
             o.setStatus(OrderStatus.PAID);
             dataManager.addOrder(o);
         }
@@ -105,7 +105,7 @@ public class DataManagerTest {
         dataManager.getPhotographers().add(p);
 
         Order o = new Order(new Client("C", "1", "e", false), p, new SessionType("S", 100.0));
-        o.setOrderDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
+        o.setCreatedDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
         dataManager.addOrder(o);
 
         // Запит на ІНШИЙ ДЕНЬ (25 жовтня), але той самий час
@@ -123,7 +123,7 @@ public class DataManagerTest {
         dataManager.getPhotographers().add(p);
 
         Order o = new Order(new Client("C", "1", "e", false), p, new SessionType("S", 100.0));
-        o.setOrderDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
+        o.setCreatedDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
         dataManager.addOrder(o);
 
         // Запит на ТОЙ САМИЙ ДЕНЬ, але о 10:00 (різниця 4 години)
@@ -141,7 +141,7 @@ public class DataManagerTest {
         dataManager.getPhotographers().add(p);
 
         Order o = new Order(new Client("C", "1", "e", false), p, new SessionType("S", 100.0));
-        o.setOrderDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
+        o.setCreatedDate(LocalDateTime.of(2026, 10, 20, 14, 0)); // Існуюче замовлення: 20 жовтня, 14:00
         dataManager.addOrder(o);
 
         // Запит на ТОЙ САМИЙ ДЕНЬ о 15:00 (різниця всього 1 година)

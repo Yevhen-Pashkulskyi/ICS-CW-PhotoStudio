@@ -75,7 +75,7 @@ public class DataManager implements Persistable, Serializable {
      */
     public Client findClientByPhone(String phone) {
         return clients.stream()
-                .filter(c -> c.getPhoneNumber().equals(phone))
+                .filter(c -> c.getPhone().equals(phone))
                 .findFirst()
                 .orElse(null);
     }
@@ -171,7 +171,7 @@ public class DataManager implements Persistable, Serializable {
             boolean isBusy = orders.stream()
                     .filter(o -> o.getPhotographer().getId().equals(p.getId()))
                     .anyMatch(o -> {
-                        LocalDateTime oDate = o.getOrderDate();
+                        LocalDateTime oDate = o.getCreatedDate();
                         return oDate.toLocalDate().isEqual(date.toLocalDate()) &&
                                 Math.abs(oDate.getHour() - date.getHour()) < 2;
                     });
@@ -203,7 +203,7 @@ public class DataManager implements Persistable, Serializable {
      */
     public double getTotalRevenueForPeriod(LocalDateTime start, LocalDateTime end) {
         return orders.stream()
-                .filter(o -> !o.getOrderDate().isBefore(start) && !o.getOrderDate().isAfter(end))
+                .filter(o -> !o.getCreatedDate().isBefore(start) && !o.getCreatedDate().isAfter(end))
                 .mapToDouble(Order::getTotalCost)
                 .sum();
     }
@@ -215,7 +215,7 @@ public class DataManager implements Persistable, Serializable {
      */
     public Optional<String> getMostPopularSessionType() {
         return orders.stream()
-                .collect(Collectors.groupingBy(o -> o.getSessionType().getName(), Collectors.counting()))
+                .collect(Collectors.groupingBy(o -> o.getSessionType().getSessionName(), Collectors.counting()))
                 .entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey);
@@ -233,25 +233,25 @@ public class DataManager implements Persistable, Serializable {
     public void saveDataToFile(String path) throws IOException {
         // 1. Збереження клієнтів
         saveCollectionToCsv(path + CLIENTS, clients, c ->
-                c.getId() + "," + c.getName() + "," + c.getPhoneNumber() + "," + c.getEmail() + "," +
+                c.getId() + "," + c.getFullName() + "," + c.getPhone() + "," + c.getEmail() + "," +
                         c.isRegular()
         );
 
         // 2. Збереження фотографів
         saveCollectionToCsv(path + PHOTOGRAPHERS, photographers, p ->
-                p.getId() + "," + p.getName() + "," + p.getPhoneNumber() + "," + p.getSpecialization()
+                p.getId() + "," + p.getFullName() + "," + p.getPhone() + "," + p.getSpecialization()
         );
 
         // 3. Збереження сесій
         saveCollectionToCsv(path + SESSION_TYPES, sessionTypes, s ->
-                s.getName() + "," + s.getBasePrice()
+                s.getSessionName() + "," + s.getPrice()
         );
 
         // 4. Збереження замовлень
         saveCollectionToCsv(path + ORDERS, orders, o ->
-                o.getId() + "," + o.getOrderDate().toString() + "," + o.getStatus() + "," +
+                o.getId() + "," + o.getCreatedDate().toString() + "," + o.getStatus() + "," +
                         o.getClient().getId() + "," + o.getPhotographer().getId() + "," +
-                        o.getSessionType().getName() + "," +
+                        o.getSessionType().getSessionName() + "," +
                         o.getTotalCost()
         );
 
@@ -339,7 +339,7 @@ public class DataManager implements Persistable, Serializable {
                     SessionType st = new SessionType(parts[5], Double.parseDouble(parts[6]));
                     Order o = new Order(c, ph, st);
                     o.setId(parts[0]);
-                    o.setOrderDate(LocalDateTime.parse(parts[1]));
+                    o.setCreatedDate(LocalDateTime.parse(parts[1]));
                     o.setStatus(OrderStatus.valueOf(parts[2]));
                     o.setTotalCost(Double.parseDouble(parts[6]));
                     orders.add(o);
@@ -397,7 +397,7 @@ public class DataManager implements Persistable, Serializable {
      */
     public boolean clientExists(String phone, String email) {
         return clients.stream().anyMatch(c ->
-                c.getPhoneNumber().equals(phone) ||
+                c.getPhone().equals(phone) ||
                         (email != null && !email.isEmpty() && c.getEmail().equalsIgnoreCase(email))
         );
     }
@@ -419,7 +419,7 @@ public class DataManager implements Persistable, Serializable {
 
         if (paidOrdersCount >= 3) {
             client.setRegular(true);
-            System.out.println("Клієнт " + client.getName() + " отримав статус постійного!");
+            System.out.println("Клієнт " + client.getFullName() + " отримав статус постійного!");
             saveAllQuietly();
         }
     }
