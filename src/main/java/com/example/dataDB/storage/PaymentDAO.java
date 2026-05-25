@@ -6,6 +6,7 @@ import com.example.entity.Payment;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class PaymentDAO {
 
@@ -31,7 +32,7 @@ public class PaymentDAO {
         }
     }
 
-    private void createTablePayment() {
+    public void createTablePayment() {
         String sql = """
                 create table if not exists payment (
                 id bigserial primary key,
@@ -40,5 +41,14 @@ public class PaymentDAO {
                 payment_date timestamp not null,
                 payment_method varchar(12) not null);
         """;
+        try(Connection connection = DataBaseConnection.getConnection();
+            Statement stmt = connection.createStatement()){
+
+            stmt.execute(sql);
+            System.out.println("Таблиця створена");
+        }catch (SQLException e){
+            System.err.println("Помилка при створенні таблиці: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
