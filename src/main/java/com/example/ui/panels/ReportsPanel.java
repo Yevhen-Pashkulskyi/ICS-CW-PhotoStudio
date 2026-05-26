@@ -1,6 +1,5 @@
 package com.example.ui.panels;
 
-import com.example.control.DatabaseManager;
 import com.example.control.OrderController;
 import com.example.dataDB.storage.ReportDAO;
 import com.example.entity.Photo;
@@ -57,7 +56,7 @@ public class ReportsPanel extends JPanel {
         menuContainer.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // Категорія 1: Локальні звіти програми
-        JLabel labelLocal = new JLabel("📊 Оперативний аналіз додатка:");
+        JLabel labelLocal = new JLabel("Оперативний аналіз додатка:");
         labelLocal.setFont(new Font("Arial", Font.BOLD, 13));
         labelLocal.setAlignmentX(Component.LEFT_ALIGNMENT);
         menuContainer.add(labelLocal);
@@ -68,12 +67,12 @@ public class ReportsPanel extends JPanel {
         localButtonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Використання посилань на методи (Method References) для чистоти коду
-        addButton(localButtonsPanel, "1. Активні замовлення", this::reportActiveOrders);
-        addButton(localButtonsPanel, "2. Статистика клієнтів", this::reportClients);
-        addButton(localButtonsPanel, "3. Фотографи", this::reportPhotographers);
-        addButton(localButtonsPanel, "4. Список фото (по ID)", this::reportPhotos);
-        addButton(localButtonsPanel, "5. Дохід", this::reportRevenue);
-        addButton(localButtonsPanel, "6. Популярна послуга", this::reportPopularType);
+        addButton(localButtonsPanel, "Активні замовлення", this::reportActiveOrders);
+        addButton(localButtonsPanel, "Статистика клієнтів", this::reportClients);
+        addButton(localButtonsPanel, "Фотографи", this::reportPhotographers);
+        addButton(localButtonsPanel, "Список фото (по ID)", this::reportPhotos);
+        addButton(localButtonsPanel, "Дохід", this::reportRevenue);
+        addButton(localButtonsPanel, "Популярна послуга", this::reportPopularType);
         menuContainer.add(localButtonsPanel);
 
         menuContainer.add(Box.createVerticalStrut(20)); // Відступ між блоками
@@ -87,15 +86,15 @@ public class ReportsPanel extends JPanel {
 
         JPanel dbButtonsPanel = new JPanel(new GridLayout(9, 1, 4, 4));
         dbButtonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        addButton(dbButtonsPanel, "Л.2.1: Клієнти заданого фотографа", this::sqlClientsByPhotographer);
-        addButton(dbButtonsPanel, "Л.2.2: Пошук клієнтів на літеру", this::sqlClientsByLetter);
-        addButton(dbButtonsPanel, "Л.2.3: Замовлення за період", this::sqlOrdersInPeriod);
-        addButton(dbButtonsPanel, "Л.2.4: Кількість нових за тиждень", this::sqlNewOrdersWeekCount);
-        addButton(dbButtonsPanel, "Л.2.5: Кількість замовлень кожного", this::sqlOrdersCountPerPhotographer);
-        addButton(dbButtonsPanel, "Л.2.6: Максимум замовлень (ALL)", this::sqlMostLoadedPhotographers);
-        addButton(dbButtonsPanel, "Л.2.7: Топ-ставки по категоріях", this::sqlTopRatesBySpec);
-        addButton(dbButtonsPanel, "Л.2.8: Вільні фотографи на Травень", this::sqlNoOrdersInMay);
-        addButton(dbButtonsPanel, "Л.2.9: Аналіз завантаженості (UNION)", this::sqlLoadingStatusUnion);
+        addButton(dbButtonsPanel, "Клієнти заданого фотографа", this::sqlClientsByPhotographer);
+        addButton(dbButtonsPanel, "Пошук клієнтів на літеру", this::sqlClientsByLetter);
+        addButton(dbButtonsPanel, "Замовлення за період", this::sqlOrdersInPeriod);
+        addButton(dbButtonsPanel, "Кількість нових за тиждень", this::sqlNewOrdersWeekCount);
+        addButton(dbButtonsPanel, "Кількість замовлень кожного", this::sqlOrdersCountPerPhotographer);
+        addButton(dbButtonsPanel, "Максимум замовлень", this::sqlMostLoadedPhotographers);
+        addButton(dbButtonsPanel, "Топ-ставки по категоріях", this::sqlTopRatesBySpec);
+        addButton(dbButtonsPanel, "Вільні фотографи на Травень", this::sqlNoOrdersInMay);
+        addButton(dbButtonsPanel, "Аналіз завантаженості", this::sqlLoadingStatusUnion);
         menuContainer.add(dbButtonsPanel);
 
         // Додаємо скрол для панелі кнопок на випадок малих екранів
@@ -107,7 +106,7 @@ public class ReportsPanel extends JPanel {
         reportArea.setEditable(false); // Заборона редагування користувачем
         reportArea.setFont(new Font("Monospaced", Font.PLAIN, 13)); // Моноширинний шрифт для вирівнювання
 
-        splitPane.setLeftComponent(localButtonsPanel);
+        splitPane.setLeftComponent(menuScrollPane);
         splitPane.setRightComponent(new JScrollPane(reportArea));
         add(splitPane, BorderLayout.CENTER);
     }
@@ -198,7 +197,7 @@ public class ReportsPanel extends JPanel {
         StringBuilder sb = new StringBuilder("=== SQL АГРЕГАТНИЙ ЗВІТ ===\n\n");
         sb.append("Завдання: Скільки нових замовлень надійшло за останні 7 днів?\n");
         sb.append("-----------------------------------------------------------------\n");
-        sb.append("📊 Результат лічильника: ").append(count).append(" нових звернень.\n");
+        sb.append("Результат лічильника: ").append(count).append(" нових звернень.\n");
         reportArea.setText(sb.toString());
     }
 
@@ -340,8 +339,8 @@ public class ReportsPanel extends JPanel {
     private void reportRevenue() {
         double totalRevenue = orderController.getTotalRevenue();
         StringBuilder sb = new StringBuilder("=== ФІНАНСОВИЙ АНАЛІТИЧНИЙ ЗВІТ ===\n\n");
-        sb.append("Загальна каса фотостудії (всі оплачені ордери):\n");
-        sb.append("💰 ").append(String.format("%.2f", totalRevenue)).append(" грн\n");
+        sb.append("Загальна каса фотостудії (всі оплачені ордери):").
+                append(String.format("%.2f", totalRevenue)).append(" грн\n");
         reportArea.setText(sb.toString());
     }
 
