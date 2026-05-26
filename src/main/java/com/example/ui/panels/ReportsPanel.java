@@ -27,7 +27,6 @@ import java.util.List;
 public class ReportsPanel extends JPanel {
 
     private final OrderController orderController;
-    private final DatabaseManager databaseManager =new DatabaseManager();
     private final JTextArea reportArea;
 
     /**
