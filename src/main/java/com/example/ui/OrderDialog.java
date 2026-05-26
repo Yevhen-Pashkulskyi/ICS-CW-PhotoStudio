@@ -310,7 +310,7 @@ public class OrderDialog extends JDialog {
 
         try {
             // Збереження в систему
-            orderController.finalizeOrder(order, fakePhotosPaths);
+            orderController.addOrder(order);
             succeeded = true;
             JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId());
             dispose(); // Закриття вікна
