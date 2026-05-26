@@ -8,6 +8,8 @@ import com.example.entity.Payment;
 import com.example.model.Order;
 import com.example.service.SessionType;
 import com.example.util.OrderStatus;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -22,6 +24,8 @@ public class DatabaseManager {
     private final SessionTypeDAO sessionTypeDAO = new SessionTypeDAO();
     private final PaymentDAO paymentDAO = new PaymentDAO();
     private final PhotoDAO photoDAO = new PhotoDAO();
+    @Getter
+    private final ReportDAO reportDAO = new ReportDAO();
 
     public DatabaseManager() {
         initializeDatabase();
