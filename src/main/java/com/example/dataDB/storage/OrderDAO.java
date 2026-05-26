@@ -80,14 +80,14 @@ public class OrderDAO {
     public List<Order> getAllOrders(){
         List<Order> orders = new ArrayList<>();
         String sql = """
-                SELECT o.id, o.created_date, o.event_date, o.delivery_date, o.order_status, o.total_cost,
-                                     c.id AS cid, c.full_name AS cname, c.phone AS cphone, c.email AS cemail, c.is_regular_client, c.discount_rate,
-                                     p.id AS pid, p.full_name AS pname, p.phone AS pphone, p.specialization, p.base_rate,
-                                     s.id AS sid, s.session_name, s.durations_hours, s.price
-                              FROM orders o
-                              JOIN clients c ON o.client_id = c.id
-                              JOIN photographer p ON o.photographer_id = p.id
-                              JOIN session_type s ON o.session_id = s.id
+                SELECT o.*,
+                       c.id AS cid, c.full_name AS cname, c.phone AS cphone, c.email AS cemail, c.is_regular_client, c.discount_rate,
+                       p.id AS pid, p.full_name AS pname, p.phone AS pphone, p.specialization, p.base_rate,
+                       s.id AS sid, s.session_name, s.durations_hours, s.price
+                FROM orders o
+                JOIN clients c ON o.client_id = c.id
+                JOIN photographer p ON o.photographer_id = p.id
+                JOIN session_type s ON o.session_id = s.id
                 """;
         try(Connection connectionq = DataBaseConnection.getConnection();
         PreparedStatement pstmt = connectionq.prepareStatement(sql);
@@ -98,7 +98,7 @@ public class OrderDAO {
                 Photographer photographer = new Photographer(rs.getLong("pid"), rs.getString("pname"), rs.getString("pphone"),
                         rs.getString("specialization"),rs.getDouble("base_rate"));
                 SessionType sessionType = new SessionType(rs.getLong("sid"), rs.getString("session_name"),
-                        rs.getInt("duration_hours"),rs.getDouble("price"));
+                        rs.getInt("durations_hours"),rs.getDouble("price"));
 
                 Order order = new Order(client, photographer, sessionType, rs.getTimestamp("event_date"), rs.getTimestamp("delivery_date"));
                 order.setId(rs.getLong("id"));
