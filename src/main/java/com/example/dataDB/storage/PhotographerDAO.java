@@ -65,7 +65,7 @@ public class PhotographerDAO {
             full_name varchar(255) not null,
             phone varchar(255) not null,
             specialization varchar(255) not null,
-            base_rate decimal(5,2) not null);
+            base_rate decimal(10,2) not null);
         """;
         try(Connection connection = DataBaseConnection.getConnection();
             Statement stmt = connection.createStatement()){
