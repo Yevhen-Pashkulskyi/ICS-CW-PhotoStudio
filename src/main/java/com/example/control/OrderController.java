@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 public class OrderController {
 
+    @Getter
     private final DatabaseManager dbManager;
 
     public OrderController(DatabaseManager dbManager) {
