@@ -1,6 +1,8 @@
 package com.example.ui.panels;
 
+import com.example.control.DatabaseManager;
 import com.example.control.OrderController;
+import com.example.dataDB.storage.ReportDAO;
 import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
@@ -9,6 +11,7 @@ import com.example.util.OrderStatus;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -24,6 +27,7 @@ import java.util.List;
 public class ReportsPanel extends JPanel {
 
     private final OrderController orderController;
+    private final DatabaseManager databaseManager =new DatabaseManager();
     private final JTextArea reportArea;
 
     /**
@@ -46,26 +50,65 @@ public class ReportsPanel extends JPanel {
 
         // Розділювач екрану
         JSplitPane splitPane = new JSplitPane();
-        splitPane.setDividerLocation(300); // Ширина меню кнопок
+        splitPane.setDividerLocation(320); // Ширина меню кнопок
+
+        // --- ЛІВА ЧАСТИНА: Меню з категоріями кнопок ---
+        JPanel menuContainer = new JPanel();
+        menuContainer.setLayout(new BoxLayout(menuContainer, BoxLayout.Y_AXIS));
+        menuContainer.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Категорія 1: Локальні звіти програми
+        JLabel labelLocal = new JLabel("📊 Оперативний аналіз додатка:");
+        labelLocal.setFont(new Font("Arial", Font.BOLD, 13));
+        labelLocal.setAlignmentX(Component.LEFT_ALIGNMENT);
+        menuContainer.add(labelLocal);
+        menuContainer.add(Box.createVerticalStrut(5));
 
         // --- Панель кнопок (Лівa частина) ---
-        JPanel buttonPanel = new JPanel(new GridLayout(6, 1, 5, 5));
-        buttonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        JPanel localButtonsPanel = new JPanel(new GridLayout(6, 1, 4, 4));
+        localButtonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Використання посилань на методи (Method References) для чистоти коду
-        addButton(buttonPanel, "1. Активні замовлення", this::reportActiveOrders);
-        addButton(buttonPanel, "2. Статистика клієнтів", this::reportClients);
-        addButton(buttonPanel, "3. Фотографи", this::reportPhotographers);
-        addButton(buttonPanel, "4. Список фото (по ID)", this::reportPhotos);
-        addButton(buttonPanel, "5. Дохід", this::reportRevenue);
-        addButton(buttonPanel, "6. Популярна послуга", this::reportPopularType);
+        addButton(localButtonsPanel, "1. Активні замовлення", this::reportActiveOrders);
+        addButton(localButtonsPanel, "2. Статистика клієнтів", this::reportClients);
+        addButton(localButtonsPanel, "3. Фотографи", this::reportPhotographers);
+        addButton(localButtonsPanel, "4. Список фото (по ID)", this::reportPhotos);
+        addButton(localButtonsPanel, "5. Дохід", this::reportRevenue);
+        addButton(localButtonsPanel, "6. Популярна послуга", this::reportPopularType);
+        menuContainer.add(localButtonsPanel);
+
+        menuContainer.add(Box.createVerticalStrut(20)); // Відступ між блоками
+
+        // Категорія 2: Складні SQL Запити до БД
+        JLabel labelDb = new JLabel("🗄️ Глибока SQL-аналітика бази даних:");
+        labelDb.setFont(new Font("Arial", Font.BOLD, 13));
+        labelDb.setAlignmentX(Component.LEFT_ALIGNMENT);
+        menuContainer.add(labelDb);
+        menuContainer.add(Box.createVerticalStrut(5));
+
+        JPanel dbButtonsPanel = new JPanel(new GridLayout(9, 1, 4, 4));
+        dbButtonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        addButton(dbButtonsPanel, "Л.2.1: Клієнти заданого фотографа", this::sqlClientsByPhotographer);
+        addButton(dbButtonsPanel, "Л.2.2: Пошук клієнтів на літеру", this::sqlClientsByLetter);
+        addButton(dbButtonsPanel, "Л.2.3: Замовлення за період", this::sqlOrdersInPeriod);
+        addButton(dbButtonsPanel, "Л.2.4: Кількість нових за тиждень", this::sqlNewOrdersWeekCount);
+        addButton(dbButtonsPanel, "Л.2.5: Кількість замовлень кожного", this::sqlOrdersCountPerPhotographer);
+        addButton(dbButtonsPanel, "Л.2.6: Максимум замовлень (ALL)", this::sqlMostLoadedPhotographers);
+        addButton(dbButtonsPanel, "Л.2.7: Топ-ставки по категоріях", this::sqlTopRatesBySpec);
+        addButton(dbButtonsPanel, "Л.2.8: Вільні фотографи на Травень", this::sqlNoOrdersInMay);
+        addButton(dbButtonsPanel, "Л.2.9: Аналіз завантаженості (UNION)", this::sqlLoadingStatusUnion);
+        menuContainer.add(dbButtonsPanel);
+
+        // Додаємо скрол для панелі кнопок на випадок малих екранів
+        JScrollPane menuScrollPane = new JScrollPane(menuContainer);
+        menuScrollPane.setBorder(null);
 
         // --- Область виводу (Права частина) ---
         reportArea = new JTextArea();
         reportArea.setEditable(false); // Заборона редагування користувачем
-        reportArea.setFont(new Font("Monospaced", Font.PLAIN, 14)); // Моноширинний шрифт для вирівнювання
+        reportArea.setFont(new Font("Monospaced", Font.PLAIN, 13)); // Моноширинний шрифт для вирівнювання
 
-        splitPane.setLeftComponent(buttonPanel);
+        splitPane.setLeftComponent(localButtonsPanel);
         splitPane.setRightComponent(new JScrollPane(reportArea));
         add(splitPane, BorderLayout.CENTER);
     }
@@ -82,11 +125,113 @@ public class ReportsPanel extends JPanel {
         JButton btn = new JButton(text);
         btn.setFocusPainted(true);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setFont(new Font("Arial", Font.PLAIN, 12));
         btn.addActionListener(e -> action.run());
         panel.add(btn);
     }
 
     // --- Логіка генерації звітів ---
+
+    /**
+     * УНІВЕРСАЛЬНИЙ МЕТОД ВИВЕДЕННЯ ТАБЛИЦЬ (Усуває дублювання коду).
+     * Форматує масив даних String[] у рівну, читаєму текстову таблицю.
+     */
+    private void printTableReport(String reportName, String[] headers, List<String[]> rows) {
+        StringBuilder sb = new StringBuilder("=== SQL ЗВІТ: " + reportName.toUpperCase() + " ===\n\n");
+
+        // Будуємо шапку таблиці
+        for (String header : headers) {
+            sb.append(String.format("%-25s | ", header));
+        }
+        sb.append("\n").append("-".repeat(headers.length * 28)).append("\n");
+
+        // Будуємо рядки
+        if (rows.isEmpty()) {
+            sb.append("[ База даних повернула порожній результат. Дані для аналізу відсутні ]\n");
+        } else {
+            for (String[] row : rows) {
+                for (String cell : row) {
+                    sb.append(String.format("%-25s | ", cell != null ? cell : "NULL"));
+                }
+                sb.append("\n");
+            }
+        }
+        reportArea.setText(sb.toString());
+    }
+
+    private ReportDAO getReportDAO() {
+        return databaseManager.getReportDAO(); // перепроверь здесь ті верно сделал или нет return orderController.getDatabaseManager().getReportDAO();?
+    }
+
+    private void sqlClientsByPhotographer() {
+        String input = JOptionPane.showInputDialog(this, "Введіть ID фотографа для аналізу:");
+        if (input == null || input.trim().isEmpty()) return;
+        try {
+            Long id = Long.parseLong(input);
+            List<String[]> data = getReportDAO().getClientsByPhotographer(id);
+            printTableReport("Список клієнтів фотографа ID " + id,
+                    new String[]{"ПІБ Клієнта", "Дата фотосесії", "Тип зйомки"}, data);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "ID має бути числом!", "Помилка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void sqlClientsByLetter() {
+        String letter = JOptionPane.showInputDialog(this, "З якої літери починається ПІБ клієнта (напр. К):");
+        if (letter == null || letter.trim().isEmpty()) return;
+        List<String[]> data = getReportDAO().getClientsByLetter(letter.trim());
+        printTableReport("Клієнти на літеру '" + letter + "'",
+                new String[]{"Повне Ім'я", "Телефон", "Email"}, data);
+    }
+
+    private void sqlOrdersInPeriod() {
+        // Для спрощення та надійності аналізу використовуємо травень 2026, як у курсовій
+        Timestamp start = Timestamp.valueOf("2026-05-01 00:00:00");
+        Timestamp end = Timestamp.valueOf("2026-05-31 23:59:59");
+
+        List<String[]> data = getReportDAO().getOrdersInPeriod(start, end);
+        printTableReport("Замовлення за Травень 2026 року",
+                new String[]{"ID Ордера", "ID Клієнта", "Дата події", "Вартість (грн)"}, data);
+    }
+
+    private void sqlNewOrdersWeekCount() {
+        int count = getReportDAO().getNewOrdersCountLastWeek();
+        StringBuilder sb = new StringBuilder("=== SQL АГРЕГАТНИЙ ЗВІТ ===\n\n");
+        sb.append("Завдання: Скільки нових замовлень надійшло за останні 7 днів?\n");
+        sb.append("-----------------------------------------------------------------\n");
+        sb.append("📊 Результат лічильника: ").append(count).append(" нових звернень.\n");
+        reportArea.setText(sb.toString());
+    }
+
+    private void sqlOrdersCountPerPhotographer() {
+        List<String[]> data = getReportDAO().getOrdersCountPerPhotographer();
+        printTableReport("Кількість виконаних/запланованих замовлень по персоналу",
+                new String[]{"Фотограф", "Всього замовлень (шт)"}, data);
+    }
+
+    private void sqlMostLoadedPhotographers() {
+        List<String[]> data = getReportDAO().getMostLoadedPhotographers();
+        printTableReport("Майстри з максимальною кількістю замовлень (Предикат ALL)",
+                new String[]{"Ім'я кращого фотографа"}, data);
+    }
+
+    private void sqlTopRatesBySpec() {
+        List<String[]> data = getReportDAO().getTopPhotographersBySpecialization();
+        printTableReport("Найвищі базові ставки за кожною спеціалізацією",
+                new String[]{"Спеціалізація", "Фотограф", "Ставка (грн/год)"}, data);
+    }
+
+    private void sqlNoOrdersInMay() {
+        List<String[]> data = getReportDAO().getPhotographersWithNoOrdersInMay2026();
+        printTableReport("Фотоографи без жодного замовлення на Травень 2026 (NOT EXISTS)",
+                new String[]{"Вільний персонал"}, data);
+    }
+
+    private void sqlLoadingStatusUnion() {
+        List<String[]> data = getReportDAO().getPhotographerLoadingStatus();
+        printTableReport("Аналіз маркерів завантаженості кадрів (UNION)",
+                new String[]{"Фотограф", "Статус системи маркетингу"}, data);
+    }
 
     /**
      * Реалізація Запиту №1: Кількість активних замовлень.
