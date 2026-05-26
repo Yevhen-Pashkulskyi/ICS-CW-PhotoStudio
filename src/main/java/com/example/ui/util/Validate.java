@@ -8,23 +8,23 @@ public class Validate extends Component {
     public boolean validateAll(String name, String phone, String email) {
 
         if (!nameValidate(name)) {
-            JOptionPane.showMessageDialog(this, "Невірне формат Ім'я");
+            JOptionPane.showMessageDialog(null, "Невірне формат Ім'я");
             return true;
         }
 
         if (nameAndPhoneNotEmpty(name, phone)) {
-            JOptionPane.showMessageDialog(this, "Ім'я та телефон обов'язкові!",
+            JOptionPane.showMessageDialog(null, "Ім'я та телефон обов'язкові!",
                     "Помилка", JOptionPane.ERROR_MESSAGE);
             return true;
         }
         if (!phoneValidate(phone)) {
-            JOptionPane.showMessageDialog(this, "Не вірний формат телефону (Прикл.: 0501234567)",
+            JOptionPane.showMessageDialog(null, "Не вірний формат телефону (Прикл.: 0501234567)",
                     "Помилка", JOptionPane.ERROR_MESSAGE);
             return true;
         }
 
         if (!emailValidate(email)) {
-            JOptionPane.showMessageDialog(this, "Недійсний email", "Помилка",
+            JOptionPane.showMessageDialog(null, "Недійсний email", "Помилка",
                     JOptionPane.WARNING_MESSAGE);
             return true;
         }
