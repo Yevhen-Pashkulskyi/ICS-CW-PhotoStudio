@@ -3,22 +3,18 @@ package com.example.ui;
 import com.example.control.DatabaseManager;
 import com.example.control.OrderController;
 import com.example.entity.Client;
-import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
 import com.example.ui.util.Validate;
-import com.example.util.OrderStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,6 +75,9 @@ public class OrderDialog extends JDialog {
      */
     private final JLabel priceLabel;
 
+    private JSpinner eventDateSpinner;
+    private JSpinner deliveryDateSpinner;
+
     /**
      * Конструктор діалогового вікна.
      * Ініціалізує розмітку, створює поля введення та заповнює списки даними.
@@ -131,6 +130,22 @@ public class OrderDialog extends JDialog {
         photographerBox = new JComboBox<>();
         fillPhotographers();
         mainPanel.add(photographerBox);
+
+        // Налаштування поля "Дата події"
+        SpinnerDateModel eventModel = new SpinnerDateModel();
+        eventDateSpinner = new JSpinner(eventModel);
+        eventDateSpinner.setEditor(new JSpinner.DateEditor(eventDateSpinner, "yyyy-MM-dd HH:mm"));
+
+// Налаштування поля "Дата доставки"
+        SpinnerDateModel deliveryModel = new SpinnerDateModel();
+        deliveryDateSpinner = new JSpinner(deliveryModel);
+        deliveryDateSpinner.setEditor(new JSpinner.DateEditor(deliveryDateSpinner, "yyyy-MM-dd HH:mm"));
+
+// Додаємо на панель (зміни під свій Layout)
+        mainPanel.add(new JLabel("Дата та час події:"));
+        mainPanel.add(eventDateSpinner);
+        mainPanel.add(new JLabel("Дата здачі матеріалу:"));
+        mainPanel.add(deliveryDateSpinner);
 
         mainPanel.add(Box.createVerticalStrut(20));
 
@@ -266,10 +281,19 @@ public class OrderDialog extends JDialog {
         }
 
         Photographer selectedPhotographer = (Photographer) photographerBox.getSelectedItem();
+
+        // 1. Отримуємо обрані дати з JSpinner
+        java.util.Date eventUtilDate = (java.util.Date) eventDateSpinner.getValue();
+        java.util.Date deliveryUtilDate = (java.util.Date) deliveryDateSpinner.getValue();
+
+        // Конвертуємо їх у Timestamp для конструктора Order та БД
+        Timestamp eventDate = new Timestamp(eventUtilDate.getTime());
+        Timestamp deliveryDate = new Timestamp(deliveryUtilDate.getTime());
+
         // Оскільки замовлення створюється на "зараз", перевіряємо поточний час
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime eventDateTime = eventDate.toLocalDateTime();
         // Отримуємо список вільних фотографів на цей час
-        List<Photographer> freePhotographers = orderController.getAvailablePhotographers(now);
+        List<Photographer> freePhotographers = orderController.getAvailablePhotographers(eventDateTime);
         // Перевіряємо, чи є наш обраний фотограф у списку вільних
         // (порівнюємо за ID, щоб уникнути помилок посилань)
         boolean isBusy = freePhotographers.stream()
@@ -278,10 +302,11 @@ public class OrderDialog extends JDialog {
         if (isBusy) {
             JOptionPane.showMessageDialog(this,
                     "Увага! Фотограф " + selectedPhotographer.getFullName() +
-                            " зараз зайнятий іншим замовленням.\nОберіть іншого фахівця або спробуйте пізніше.",
+                            " вже зайнятий на цей час (" + eventDateTime.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + ").\n" +
+                            "Оберіть іншого фахівця або іншу дату події.",
                     "Фотограф зайнятий",
                     JOptionPane.ERROR_MESSAGE);
-            return; // Зупиняємо процес, замовлення НЕ створюється
+            return;
         }
         // 2. Пошук або створення клієнта (через DataManager!)
         Client client = orderController.findClient(phone);
@@ -293,30 +318,32 @@ public class OrderDialog extends JDialog {
 
         // 3. Отримання обраних об'єктів
         SessionType session = (SessionType) sessionTypeBox.getSelectedItem();
-        Photographer photographer = (Photographer) photographerBox.getSelectedItem();
 
         // 4. Створення замовлення
-        Order order = new Order(client, photographer, session, Timestamp.valueOf(now),
-                null);
+        Order order = new Order(client, selectedPhotographer, session, eventDate,
+                deliveryDate);
+        order.setTotalCost(session.getPrice());
 
         // Імітація процесу зйомки: генеруємо випадкову кількість фото від 3 до 10. Це поки але я створю надалі папку і там будуть реальні фото
-        int photoCount = 3 + (int) (Math.random() * 8);
+//        int photoCount = 3 + (int) (Math.random() * 8);
 
-        List<String> fakePhotosPaths= new ArrayList<>();
-        for (int i = 1; i <= photoCount; i++) {
-            String fileName = "IMG_" + (1000 + (int) (Math.random() * 9000)) + ".JPG";
-            fakePhotosPaths.add(fileName);
-        }
+//        List<String> fakePhotosPaths = new ArrayList<>();
+//        for (int i = 1; i <= photoCount; i++) {
+//            String fileName = "IMG_" + (1000 + (int) (Math.random() * 9000)) + ".JPG";
+//            fakePhotosPaths.add(fileName);
+//        }
 
+        order.setCreatedDate(new Timestamp(System.currentTimeMillis()));
         try {
             // Збереження в систему
             orderController.addOrder(order);
             succeeded = true;
             JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId());
             dispose(); // Закриття вікна
-        }catch (Exception e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Помилка при збереженні замовлення: " + e.getMessage(),
                     "Помилка БД", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
 
     }
