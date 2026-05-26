@@ -56,6 +56,16 @@ public class OrderController {
         return basePrice;
     }
 
+    // Метод для створення нового замовлення (без фотографій)
+    public void addOrder(Order order) {
+        boolean saved = dbManager.saveOrder(order);
+        if (saved) {
+            System.out.println("Нове замовлення успішно створено в системі!");
+        } else {
+            throw new RuntimeException("Не вдалося зберегти замовлення в БД.");
+        }
+    }
+
     // Метод з діаграми: фіналізація та збереження
     public void finalizeOrder(Order order, List<String> photoPath) throws IOException {
         boolean saved = dbManager.saveOrder(order);
