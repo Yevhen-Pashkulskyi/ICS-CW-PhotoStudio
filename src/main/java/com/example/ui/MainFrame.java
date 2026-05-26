@@ -45,7 +45,7 @@ public class MainFrame extends JFrame {
      */
     public MainFrame() {
         setTitle("Фотоательє");
-        setSize(1000, 700);
+        setSize(1520, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Центрування вікна на екрані
         setLayout(new BorderLayout());
