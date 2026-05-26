@@ -8,6 +8,7 @@ import com.example.entity.Photographer;
 import com.example.model.Order;
 import com.example.service.SessionType;
 import com.example.util.OrderStatus;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
