@@ -160,7 +160,7 @@ public class ReportsPanel extends JPanel {
     }
 
     private ReportDAO getReportDAO() {
-        return databaseManager.getReportDAO(); // перепроверь здесь ті верно сделал или нет return orderController.getDatabaseManager().getReportDAO();?
+        return orderController.getDbManager().getReportDAO();
     }
 
     private void sqlClientsByPhotographer() {
