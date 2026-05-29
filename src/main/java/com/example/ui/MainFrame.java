@@ -13,20 +13,12 @@ import java.awt.*;
 
 /**
  * Головне вікно програми (Main Window).
- * <p>
- * Цей клас є контейнером верхнього рівня, що об'єднує всі функціональні модулі системи.
- * Архітектура інтерфейсу побудована за схемою "Dashboard" (Панель керування):
- * <ul>
- * <li><b>Ліва частина (WEST):</b> Статичне бічне меню для навігації.</li>
- * <li><b>Центральна частина (CENTER):</b> Динамічна область, що змінюється залежно від обраного пункту.</li>
- * </ul>
- * Для перемикання між екранами використовується менеджер компонування {@link CardLayout}.
+ * Забезпечує навігацію між модулями через CardLayout за схемою Dashboard.
  */
 public class MainFrame extends JFrame {
 
-    /** Посилання на центральний контролер даних. */
     private final DatabaseManager databaseManager;
-    private final OrderController  orderController;
+    private final OrderController orderController;
 
     /** Панель-контейнер для відображення змінних екранів (карток). */
     private final JPanel contentPanel;
@@ -34,70 +26,66 @@ public class MainFrame extends JFrame {
     /** Менеджер компонування для перемикання екранів. */
     private final CardLayout cardLayout;
 
-    // Зберігаємо прямі посилання на панелі, щоб мати змогу викликати їх методи (наприклад, оновлення таблиць)
+    // Зберігаємо прямі посилання на панелі для оперативної синхронізації даних
+    private final DashboardPanel dashboardPanel;
     private final OrdersPanel ordersPanel;
     private final ClientsPanel clientsPanel;
 
     /**
      * Конструктор головного вікна.
-     * Налаштовує розмір, заголовок, ініціалізує контролер даних,
-     * створює бічне меню та додає всі функціональні панелі.
      */
     public MainFrame() {
-        setTitle("Фотоательє");
-        setSize(1520, 700);
+        setTitle("Фотоательє — Система управління");
+        setSize(1520, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Центрування вікна на екрані
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Ініціалізація логіки (завантаження даних відбувається всередині конструктора DataManager)
+        // Ініціалізація менеджерів даних
         databaseManager = new DatabaseManager();
         orderController = new OrderController(databaseManager);
 
-        // Додавання бічного меню (ліва частина)
-        add(createSidebar(), BorderLayout.WEST);
-
-        // Налаштування центральної частини
+        // Налаштування центрального контейнера карток
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
-        contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20)); // Відступи від країв
-        contentPanel.setBackground(new Color(245, 245, 250)); // Світлий фон робочої області
+        contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        contentPanel.setBackground(new Color(245, 245, 250));
 
-        // Ініціалізація та додавання панелей
-        // Ми створюємо їх тут, щоб передати DataManager
+        // Ініціалізація панелей
+        dashboardPanel = new DashboardPanel(this, orderController);
         ordersPanel = new OrdersPanel(orderController);
         clientsPanel = new ClientsPanel(orderController);
 
-        // Додавання "карток" в CardLayout з унікальними іменами (ключами)
-        contentPanel.add(new DashboardPanel(this, orderController), "DASHBOARD");
+        // Додавання "карток" в CardLayout
+        contentPanel.add(dashboardPanel, "DASHBOARD");
         contentPanel.add(ordersPanel, "ORDERS");
         contentPanel.add(clientsPanel, "CLIENTS");
         contentPanel.add(new ReportsPanel(orderController), "REPORTS");
 
+        // Збирання інтерфейсу докупи
+        add(createSidebar(), BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
     }
 
     /**
      * Створює бічну панель навігації.
-     * Містить логотип, кнопки перемикання розділів та кнопку виходу.
-     * @return налаштована панель JPanel.
      */
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(new Color(50, 60, 80)); // Темно-синій колір меню
-        sidebar.setPreferredSize(new Dimension(220, getHeight()));
-        sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
+        sidebar.setBackground(new Color(40, 50, 65)); // Трохи м'якший темний відтінок
+        sidebar.setPreferredSize(new Dimension(220, 0)); // ВИПРАВЛЕНО: Замість getHeight() передаємо 0, BorderLayout сам розтягне по вертикалі
+        sidebar.setBorder(new EmptyBorder(25, 15, 25, 15));
 
-        // Логотип / Заголовок
+        // Логотип / Заголовок системи
         JLabel titleLabel = new JLabel("ФОТОАТЕЛЬЄ");
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(titleLabel);
         sidebar.add(Box.createVerticalStrut(40));
 
-        // Додавання навігаційних кнопок
+        // Навігаційне меню
         sidebar.add(createMenuButton("Головна", "DASHBOARD"));
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(createMenuButton("Замовлення", "ORDERS"));
@@ -106,18 +94,20 @@ public class MainFrame extends JFrame {
         sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(createMenuButton("Звіти", "REPORTS"));
 
-        // "Пружина" для притискання кнопки виходу до низу
+        // Штовхач кнопки вниз
         sidebar.add(Box.createVerticalGlue());
 
-        // Кнопка безпечного виходу
+        // Кнопка безпечного виходу з закриттям ресурсів
         JButton exitBtn = new JButton("Зберегти та Вийти");
         styleButton(exitBtn);
-        exitBtn.setBackground(new Color(220, 80, 80));
+        exitBtn.setBackground(new Color(217, 83, 79)); // Гарний коралово-червоний колір
         exitBtn.setForeground(Color.WHITE);
 
         exitBtn.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Ви впевнені, що хочете закрити програму?", "Вихід", JOptionPane.YES_NO_OPTION);
+                    "Ви впевнені, що хочете завершити роботу?",
+                    "Підтвердження виходу", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
             if (confirm == JOptionPane.YES_OPTION) {
                 System.exit(0);
             }
@@ -128,41 +118,38 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Створює кнопку меню та додає логіку перемикання екранів.
-     * <p>
-     * <b>Важливо:</b> При натисканні на кнопки "Замовлення" або "Клієнти"
-     * викликається метод {@code refreshTable()}. Це гарантує, що користувач
-     * завжди бачить актуальні дані, навіть якщо вони були змінені в інших вікнах.
-     *
-     * @param text     Текст на кнопці.
-     * @param cardName Ключ (ім'я) картки в CardLayout, яку треба показати.
-     * @return налаштована кнопка JButton.
+     * Створює кнопку меню та забезпечує динамічне оновлення інтерфейсів при перемиканні.
      */
     private JButton createMenuButton(String text, String cardName) {
         JButton btn = new JButton(text);
         styleButton(btn);
         btn.addActionListener(e -> {
-            // Оновлення даних перед показом відповідної панелі
-            if (cardName.equals("ORDERS")) ordersPanel.refreshTable();
-            if (cardName.equals("CLIENTS")) clientsPanel.refreshTable();
+            switch (cardName) {
+                case "DASHBOARD" -> {
+                    if (dashboardPanel != null) {
+                        dashboardPanel.refreshStats();
+                    }
+                }
+                case "ORDERS" -> ordersPanel.refreshTable();
+                case "CLIENTS" -> clientsPanel.refreshTable();
+            }
 
-            // Перемикання видимого екрану
+            // Перемикаємо екран
             cardLayout.show(contentPanel, cardName);
         });
         return btn;
     }
 
     /**
-     * Застосовує єдиний стиль оформлення до кнопок меню.
-     * @param btn кнопка для стилізації.
+     * Уніфікована стилізація кнопок управління.
      */
     private void styleButton(JButton btn) {
-        btn.setMaximumSize(new Dimension(200, 40));
+        btn.setMaximumSize(new Dimension(190, 40));
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btn.setFocusPainted(true); // Прибирає рамку фокусу
-        btn.setFont(new Font("Arial", Font.PLAIN, 14));
-        btn.setBackground(new Color(255, 255, 255));
-        btn.setForeground(Color.BLACK);
+        btn.setFocusPainted(false); // Виправлено: false повністю прибирає некрасиву внутрішню рамку фокусу Swing
+        btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(new Color(33, 37, 41));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 }

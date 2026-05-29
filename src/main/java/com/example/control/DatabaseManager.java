@@ -5,15 +5,12 @@ import com.example.entity.Client;
 import com.example.entity.Photo;
 import com.example.entity.Photographer;
 import com.example.entity.Payment;
-import com.example.model.Order;
-import com.example.service.SessionType;
+import com.example.entity.Order;
+import com.example.entity.SessionType;
 import com.example.util.OrderStatus;
 import lombok.Getter;
-import lombok.Setter;
+import org.postgresql.core.ConnectionFactory;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseManager {
@@ -24,6 +21,7 @@ public class DatabaseManager {
     private final SessionTypeDAO sessionTypeDAO = new SessionTypeDAO();
     private final PaymentDAO paymentDAO = new PaymentDAO();
     private final PhotoDAO photoDAO = new PhotoDAO();
+
     @Getter
     private final ReportDAO reportDAO = new ReportDAO();
 
@@ -35,11 +33,6 @@ public class DatabaseManager {
         return getAllClients().stream()
                 .filter(c -> c.getPhone().equals(phone))
                 .findFirst().orElse(null);
-    }
-
-    public List<Photographer> fetchFreePhotographers(Date date) {
-        // Логіка вибірки фотографів, у яких графік порожній на цю дату
-        return new ArrayList<>();
     }
 
     public boolean saveOrder(Order o) {
@@ -64,7 +57,18 @@ public class DatabaseManager {
         }
     }
 
-    // Зберігаємо корисне зі старої програми: методи швидкого завантаження списків для таблиць UI
+    public void saveClient(Client client) {
+        clientDAO.saveClients(client);
+    }
+
+    public void updateClient(Client client) {
+        clientDAO.updateClient(client);
+    }
+
+    public void savePhoto(Photo photo) {
+        photoDAO.savePhoto(photo);
+    }
+
     public List<Client> getAllClients() {
         return clientDAO.getClients();
     }
@@ -88,19 +92,12 @@ public class DatabaseManager {
     private void initializeDatabase() {
         try {
             System.out.println("Перевірка та ініціалізація таблиць БД...");
-
-            // 1. Спочатку створюємо незалежні довідники
-            clientDAO.createTableClient(); // Переконайся, що в ClientDAO цей метод теж є і він public
+            clientDAO.createTableClient();
             photographerDAO.createTablePhotographer();
             sessionTypeDAO.createTableSessionType();
-
-            // 2. Потім таблиці, які залежать від перших (мають Foreign Keys)
             orderDAO.createdTableOrder();
-
-            // 3. Наприкінці — таблиці найнижчого рівня залежності
             photoDAO.createTablePhoto();
             paymentDAO.createTablePayment();
-
             System.out.println("Ініціалізація бази даних успішно завершена!");
         } catch (Exception e) {
             System.err.println("КРИТИЧНА ПОМИЛКА: Не вдалося ініціалізувати таблиці бази даних!");

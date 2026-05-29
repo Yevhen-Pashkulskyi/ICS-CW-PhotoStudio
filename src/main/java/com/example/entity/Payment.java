@@ -1,67 +1,53 @@
 package com.example.entity;
 
-import com.example.model.Order;
 import com.example.util.PaymentMethod;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 /**
  * Клас, що моделює фінансову транзакцію (оплату).
  * Зберігає інформацію про проведені платежі, зв'язуючи їх з конкретним замовленням.
- * Створюється автоматично при виконанні сценарію оплати (ВВ2).
  */
-@EqualsAndHashCode()
-@Getter
+@Data
+@NoArgsConstructor
 public class Payment implements Serializable {
 
-    /**
-     * Унікальний ідентифікатор транзакції (UUID).
-     */
-    private final long id;
+    private long id;
 
     /**
-     * Ідентифікатор замовлення, за яке проводиться оплата.
-     * Використовується як зовнішній ключ для зв'язку з об'єктом Order.
+     * Об'єкт замовлення, за яке проводиться оплата (Зв'язок ManyToOne/Foreign Key).
      */
-    private final Order orderId;
+    private Order orderId;
+    private double paymentAmount;
+    private Timestamp paymentDate;
+    private PaymentMethod paymentMethod;
 
     /**
-     * Сума оплати у грошовому еквіваленті.
+     * Конструктор для ініціалізації нового платежу в системі.
      */
-    private final double paymentAmount;
-
-    /**
-     * Дата та точний час проведення фінансової операції.
-     */
-    private final Timestamp paymentDate;
-
-    private final PaymentMethod paymentMethod;
-
-    /**
-     * Конструктор для фіксації нового платежу.
-     * Автоматично генерує унікальний ID транзакції та фіксує поточний час.
-     *
-     * @param orderId ID пов'язаного замовлення, яке оплачується.
-     * @param paymentAmount  Сума коштів, що була внесена клієнтом.
-     */
-    public Payment(long id, Order orderId, double paymentAmount) {
-        this.id = id;
-//        this.id = UUID.randomUUID().toString();
+    public Payment(Order orderId, double paymentAmount, PaymentMethod paymentMethod) {
         this.orderId = orderId;
         this.paymentAmount = paymentAmount;
-        this.paymentDate = Timestamp.valueOf(LocalDateTime.now()); // Фіксуємо час створення об'єкта як час оплати
-        this.paymentMethod = PaymentMethod.CARD;
+        this.paymentDate = new Timestamp(System.currentTimeMillis());
+        this.paymentMethod = paymentMethod;
     }
 
     /**
-     * Повертає строкове представлення платежу для технічного логування.
-     * @return рядок з основною інформацією про транзакцію.
+     * Конструктор для завантаження платежу з БД.
      */
+    public Payment(long id, Order orderId, double paymentAmount, Timestamp paymentDate, PaymentMethod paymentMethod) {
+        this.id = id;
+        this.orderId = orderId;
+        this.paymentAmount = paymentAmount;
+        this.paymentDate = paymentDate;
+        this.paymentMethod = paymentMethod;
+    }
+
     @Override
     public String toString() {
-        return "Payment [ID=" + id + ", OrderID=" + orderId + ", Amount=" + paymentAmount + "]";
+        return "Payment [ID=" + id + ", OrderID=" + (orderId != null ? orderId.getId() : "null") + ", Amount=" + paymentAmount + " грн]";
     }
 }

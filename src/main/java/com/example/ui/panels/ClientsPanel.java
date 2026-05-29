@@ -1,6 +1,5 @@
 package com.example.ui.panels;
 
-import com.example.control.DatabaseManager;
 import com.example.control.OrderController;
 import com.example.entity.Client;
 import com.example.ui.util.Validate;
@@ -11,27 +10,17 @@ import java.awt.*;
 
 /**
  * Панель графічного інтерфейсу для управління базою клієнтів.
- * Відповідає за відображення списку клієнтів у вигляді таблиці
- * та надає функціонал для додавання нових записів.
- * Є частиною головного вікна програми (вкладка "Клієнти").
  */
 public class ClientsPanel extends JPanel {
 
-    /**
-     * Посилання на центральний контролер даних.gftr45
-     */
+    /** Посилання на центральний контролер даних. */
     private final OrderController orderController;
 
-    /**
-     * Модель даних для таблиці, що дозволяє динамічно оновлювати рядки.
-     */
+    /** Модель даних для таблиці, що дозволяє динамічно оновлювати рядки. */
     private final DefaultTableModel clientTableModel;
 
     /**
      * Конструктор панелі клієнтів.
-     * Ініціалізує візуальні компоненти (кнопки, таблицю) та наповнює їх даними.
-     *
-     * @param orderController екземпляр менеджера даних для доступу до списку клієнтів.
      */
     public ClientsPanel(OrderController orderController) {
         this.orderController = orderController;
@@ -59,7 +48,7 @@ public class ClientsPanel extends JPanel {
         clientTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Робимо таблицю тільки для читання
+                return false; // Таблиця тільки для читання
             }
         };
 
@@ -74,19 +63,18 @@ public class ClientsPanel extends JPanel {
     }
 
     /**
-     * Оновлює вміст таблиці актуальними даними з DataManager.
-     * Метод очищує поточні рядки таблиці та заново заповнює її,
-     * ітеруючи по списку клієнтів.
+     * Оновлює вміст таблиці актуальними даними з контролера.
      */
     public void refreshTable() {
         clientTableModel.setRowCount(0); // Очищення таблиці
         for (Client c : orderController.getClients()) {
-            Object[] row = { // мені здається що масив даних запонен не до кінця але ти мене поправ якщо я не прав?
+
+            Object[] row = {
                     c.getId(),
                     c.getFullName(),
                     c.getPhone(),
                     c.getEmail(),
-                    c.isRegular() ? "Постійний" : "Новий", // Текстове представлення статусу
+                    c.isRegular() ? "Постійний" : "Новий",
                     c.getDiscountRate() + " %"
             };
             clientTableModel.addRow(row);
@@ -95,12 +83,6 @@ public class ClientsPanel extends JPanel {
 
     /**
      * Відображає модальне діалогове вікно для додавання нового клієнта.
-     * Реалізує логіку валідації введених даних:
-     * <ul>
-     * <li>Перевірка на порожні поля (ім'я та телефон обов'язкові).</li>
-     * <li>Перевірка на дублікати (чи існує вже такий телефон/email).</li>
-     * </ul>
-     * Якщо валідація успішна, створює нового клієнта та додає його в систему.
      */
     private void showAddClientDialog() {
         JTextField nameField = new JTextField();
@@ -115,26 +97,26 @@ public class ClientsPanel extends JPanel {
             String name = nameField.getText().trim();
             String phone = phoneField.getText().trim();
             String email = emailField.getText().trim();
-            Validate validate = new Validate();
-            // 1. Перевірка
-            if (validate.validateAll(name, phone, email)) return;
 
-            // 2. Перевірка на дублікати (використовує бізнес-логіку DataManager)
+            if (Validate.validateAll(this, name, phone, email)) return;
+
+            // 2. Перевірка на дублікати за номером телефону
+            // ВИПРАВЛЕНО: Текст попередження тепер чітко відповідає логіці (перевірка за телефоном)
             if (orderController.findClient(phone) != null) {
                 JOptionPane.showMessageDialog(this,
-                        "Клієнт з таким номером телефону або Email вже існує!",
+                        "Клієнт з таким номером телефону вже існує!",
                         "Дублювання даних",
                         JOptionPane.WARNING_MESSAGE);
-                return; // Зупиняємо створення, щоб уникнути колізій
+                return;
             }
 
-            try{
-                // 3. Якщо все ок — створюємо об'єкт та зберігаємо
-                Client newClient = new Client(name, phone, email, false,0.0);
+            try {
+                // 3. Якщо все ок — створюємо об'єкт із початковою нульовою знижкою
+                Client newClient = new Client(name, phone, email, false, 0.0);
                 orderController.addClient(newClient);
-                refreshTable(); // Оновлюємо таблицю, щоб показати нового клієнта
+                refreshTable(); // Синхронно оновлюємо UI
                 JOptionPane.showMessageDialog(this, "Клієнт успішно доданий!");
-            }catch(Exception e){
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Помилка додавання клієнта: " + e.getMessage(),
                         "Помилка БД", JOptionPane.ERROR_MESSAGE);
             }

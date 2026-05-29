@@ -1,19 +1,19 @@
 package com.example.entity;
 
-import lombok.Data;
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Абстрактний базовий клас для всіх персон у системі (клієнтів, фотографів).
  * Містить спільні атрибути, такі як ідентифікатор, ім'я та контактні дані.
- * Реалізує інтерфейс {@link Serializable} для забезпечення можливості збереження стану об'єктів у файл.
  */
 @Data
+@NoArgsConstructor
 public abstract class Person implements Serializable {
 
     /**
-     * Унікальний ідентифікатор особи (UUID).
-     * Генерується автоматично при створенні нового об'єкта або відновлюється з файлу.
+     * Унікальний ідентифікатор особи в базі даних.
      */
     protected Long id;
 
@@ -24,45 +24,28 @@ public abstract class Person implements Serializable {
 
     /**
      * Контактний номер телефону.
-     * Використовується як один з критеріїв пошуку та ідентифікації.
      */
     protected String phone;
 
     /**
-     * Конструктор для ініціалізації базових полів особи.
-     * Автоматично генерує унікальний ID.
-     *
-     * @param fullName        Ім'я особи.
-     * @param phone Контактний номер телефону.
+     * Конструктор для створення нової особи без ID (до збереження в БД).
      */
     public Person(String fullName, String phone) {
-        // Автоматична генерація унікального ID за допомогою UUID
-//        this.id = UUID.randomUUID().toString();
         this.fullName = fullName;
         this.phone = phone;
     }
+
     /**
-     * Конструктор для ініціалізації базових полів особи.
-     * Автоматично генерує унікальний ID.
-     *
-     * @param fullName        Ім'я особи.
-     * @param phone Контактний номер телефону.
+     * Конструктор для відновлення особи з бази даних (з існуючим ID).
      */
     public Person(Long id, String fullName, String phone) {
-        // Автоматична генерація унікального ID за допомогою UUID
         this.id = id;
         this.fullName = fullName;
         this.phone = phone;
     }
 
-    /**
-     * Повертає строкове представлення особи.
-     * Базова реалізація, яка може бути розширена у нащадках.
-     *
-     * @return рядок у форматі "Ім'я (тел: Номер)".
-     */
     @Override
     public String toString() {
-        return fullName + " ( тел: " + phone + ")";
+        return fullName + " (тел: " + phone + ")";
     }
 }

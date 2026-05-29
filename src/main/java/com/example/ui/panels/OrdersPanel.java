@@ -1,37 +1,24 @@
 package com.example.ui.panels;
 
-import com.example.control.DatabaseManager;
 import com.example.control.OrderController;
 import com.example.entity.Payment;
-import com.example.model.Order;
+import com.example.entity.Order;
 import com.example.util.OrderStatus;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 
 /**
  * Панель графічного інтерфейсу для управління списком замовлень.
- * Забезпечує відображення історії замовлень у табличному вигляді
- * та надає функціонал для зміни статусу замовлення (прийом оплати).
- * Є реалізацією вкладки "Замовлення" у головному вікні.
  */
 public class OrdersPanel extends JPanel {
 
-    /** Посилання на центральний контролер даних. */
     private final OrderController orderController;
-
-    /** Модель таблиці, що зберігає дані про замовлення для відображення. */
     private final DefaultTableModel orderTableModel;
 
-    /**
-     * Конструктор панелі замовлень.
-     * Налаштовує макет (Layout), створює таблицю з нередагованими клітинками
-     * та панель інструментів для дій над замовленнями.
-     *
-     * @param orderController екземпляр менеджера даних.
-     */
     public OrdersPanel(OrderController orderController) {
         this.orderController = orderController;
         setLayout(new BorderLayout());
@@ -49,10 +36,9 @@ public class OrdersPanel extends JPanel {
         topPanel.add(refreshBtn);
         add(topPanel, BorderLayout.NORTH);
 
-        // Налаштування таблиці
+        // Налаштування таблиці (7 колонок)
         String[] columns = {"ID", "Дата", "Клієнт", "Послуга", "Фотограф", "Статус", "Ціна"};
 
-        // Перевизначення моделі для заборони редагування клітинок вручну
         orderTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -61,16 +47,14 @@ public class OrdersPanel extends JPanel {
         JTable table = new JTable(orderTableModel);
         table.setRowHeight(25);
         table.setFont(new Font("Arial", Font.PLAIN, 13));
-
-        // Встановлення ширини першої колонки (ID), щоб заощадити місце
         table.getColumnModel().getColumn(0).setPreferredWidth(60);
 
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Нижня панель дій (Сценарій ВВ2: Оплата)
+        // Нижня панель дій
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton payBtn = new JButton("Прийняти оплату / Видати фото");
-        payBtn.setBackground(new Color(255, 165, 0)); // Помаранчевий колір для акценту
+        payBtn.setBackground(new Color(255, 165, 0));
         payBtn.setForeground(Color.BLACK);
         payBtn.setFont(new Font("Arial", Font.BOLD, 12));
 
@@ -79,101 +63,79 @@ public class OrdersPanel extends JPanel {
         actionPanel.add(payBtn);
         add(actionPanel, BorderLayout.SOUTH);
 
-        // Завантаження даних при ініціалізації
         refreshTable();
     }
 
-    /**
-     * Оновлює дані в таблиці замовлень.
-     * Очищує поточний вміст моделі та заново наповнює її даними з DataManager.
-     * Використовує {@link DateTimeFormatter} для зручного відображення дати створення.
-     */
     public void refreshTable() {
-        orderTableModel.setRowCount(0); // Очищення таблиці
+        orderTableModel.setRowCount(0);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         for (Order o : orderController.getOrders()) {
+            Timestamp createdDate = o.getCreatedDate();
+            String formattedDate = (createdDate != null)
+                    ? createdDate.toLocalDateTime().format(formatter)
+                    : "Не вказано";
+
             Object[] row = {
                     o.getId(),
-                    o.getCreatedDate().toLocalDateTime().format(formatter),
-                    o.getClient().getFullName(),
-                    o.getSessionType().getSessionName(),
-                    o.getPhotographer().getFullName(),
+                    formattedDate,
+                    o.getClient() != null ? o.getClient().getFullName() : "Видалений клієнт",
+                    o.getSessionType() != null ? o.getSessionType().getSessionName() : "Невідома послуга",
+                    o.getPhotographer() != null ? o.getPhotographer().getFullName() : "Без фотографа",
                     o.getStatus(),
-                    o.getTotalCost() + " грн"
+                    String.format("%.2f грн", o.getTotalCost())
             };
             orderTableModel.addRow(row);
         }
     }
 
-    /**
-     * Обробляє процес оплати обраного замовлення (Реалізація Сценарію ВВ2).
-     * <p>
-     * Алгоритм роботи:
-     * <ol>
-     * <li>Перевіряє, чи обрано рядок у таблиці.</li>
-     * <li>Перевіряє поточний статус (неможливо оплатити вже оплачене замовлення).</li>
-     * <li>Запитує підтвердження у користувача.</li>
-     * <li>Змінює статус замовлення на {@code PAID}.</li>
-     * <li>Створює запис про платіж {@link Payment}.</li>
-     * <li>Викликає перевірку лояльності клієнта (чи став він постійним).</li>
-     * <li>Оновлює таблицю та виводить повідомлення про результат.</li>
-     * </ol>
-     *
-     * @param table посилання на таблицю для визначення обраного рядка.
-     */
     private void processPayment(JTable table) {
         int selectedRow = table.getSelectedRow();
 
-        // Валідація вибору
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Оберіть замовлення!", "Помилка", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Оберіть замовлення зі списку!", "Помилка вибору", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // БЕЗПЕЧНО: Беремо ID прямо з першої колонки (індекс 0) обраного рядка
-        long orderId = (long) table.getValueAt(selectedRow, 0);
+        try {
+            long orderId = Long.parseLong(table.getValueAt(selectedRow, 0).toString());
 
-        // Шукаємо замовлення у списку за його унікальним ID
-        Order selectedOrder = orderController.getOrders().stream()
-                .filter(o -> o.getId() == orderId)
-                .findFirst()
-                .orElse(null);
+            Order selectedOrder = orderController.getOrders().stream()
+                    .filter(o -> o.getId() == orderId)
+                    .findFirst()
+                    .orElse(null);
 
-        if (selectedOrder == null) {
-            JOptionPane.showMessageDialog(this, "Замовлення не знайдено!", "Помилка", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            if (selectedOrder == null) {
+                JOptionPane.showMessageDialog(this, "Замовлення не знайдено в системі!", "Помилка", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        // Перевірка бізнес-правила: не можна платити двічі
-        if (selectedOrder.getStatus() == OrderStatus.PAID) {
-            JOptionPane.showMessageDialog(this, "Вже оплачено!", "Інфо", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
+            if (selectedOrder.getStatus() == OrderStatus.PAID) {
+                JOptionPane.showMessageDialog(this, "Це замовлення вже успішно оплачене!", "Інформація", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
 
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Прийняти оплату " + selectedOrder.getTotalCost() + " грн?", "Оплата", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    String.format("Прийняти оплату в розмірі %.2f грн?", selectedOrder.getTotalCost()),
+                    "Підтвердження транзакції", JOptionPane.YES_NO_OPTION);
 
-        if (confirm == JOptionPane.YES_OPTION) {
-
-            try{
-                // Делегуємо всю роботу контролеру (збереження статусу, транзакція оплати, лояльність)
+            if (confirm == JOptionPane.YES_OPTION) {
+                // Делегуємо проведення оплати контролеру
                 orderController.completeOrderPayment(selectedOrder);
 
-                // 4. Оновлюємо інтерфейс
-                refreshTable();
+                refreshTable(); // Синхронне оновлення UI
 
-                // Інформування користувача про результат
-                if (selectedOrder.getClient().isRegular()) {
+                if (selectedOrder.getClient() != null && selectedOrder.getClient().isRegular()) {
                     JOptionPane.showMessageDialog(this,
-                            "Оплата успішна!\nУВАГА: Цей клієнт досяг 3-х замовлень і отримав статус 'Постійний'!");
+                            "Оплата успішна!\nУВАГА: Клієнт отримав статус 'Постійний' та постійну знижку!",
+                            "Статус оновлено", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Оплата успішна!");
+                    JOptionPane.showMessageDialog(this, "Оплата успішно проведена!", "Успіх", JOptionPane.INFORMATION_MESSAGE);
                 }
-            }catch (Exception e){
-                JOptionPane.showMessageDialog(this, "Помилка при проведенні оплати: " + e.getMessage(),
-                        "Помилка БД", JOptionPane.ERROR_MESSAGE);
             }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Помилка при проведенні оплати: " + e.getMessage(),
+                    "Критична помилка БД", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

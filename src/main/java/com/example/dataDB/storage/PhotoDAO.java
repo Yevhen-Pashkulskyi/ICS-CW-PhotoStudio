@@ -3,7 +3,6 @@ package com.example.dataDB.storage;
 import com.example.dataDB.DataBaseConnection;
 import com.example.entity.Client;
 import com.example.entity.Photo;
-import com.example.model.Order;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -17,16 +16,23 @@ public class PhotoDAO {
                 values (?, ?);
                 """;
         try (Connection connection = DataBaseConnection.getConnection();
-             PreparedStatement pstm = connection.prepareStatement(sql)) {
+             PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+
             pstm.setString(1, photo.getFilePath());
             pstm.setLong(2, photo.getOrderId());
 
             pstm.executeUpdate();
+
+            try (var generatedKeys = pstm.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    photo.setId(generatedKeys.getLong(1));
+                }
+            }
             System.out.println("Фото успішно збереглось!" + photo.getFilePath());
 
         } catch (SQLException e) {
             System.err.println("Не вдалось зберегти фото: " + e.getMessage());
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
 
     }
@@ -54,7 +60,7 @@ public class PhotoDAO {
 
         } catch (SQLException e) {
             System.err.println("Помилка при завантаженні фото клієнта: " + e.getMessage());
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
         return photos;
     }
@@ -62,10 +68,9 @@ public class PhotoDAO {
     public List<Photo> loadPhotosByOrder(Long orderId) {
         List<Photo> photos = new ArrayList<>();
         String sql = """
-                SELECT p.id, p.file_path, p.order_id
-                FROM photos p
-                JOIN orders o ON p.order_id = o.id
-                WHERE p.order_id = ?
+                SELECT id, file_path, order_id
+                FROM photos 
+                WHERE order_id = ?
                 """;
         try (Connection connection = DataBaseConnection.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql);) {
@@ -83,7 +88,8 @@ public class PhotoDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Помилка при завантаженні фото замовлення: " + e.getMessage());
+            throw new RuntimeException(e);
         }
 
         return photos;

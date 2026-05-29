@@ -4,90 +4,141 @@ import com.example.control.OrderController;
 import com.example.ui.OrderDialog;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
  * Панель головного екрану (Dashboard) програми.
- * Відображається відразу після запуску та вітає користувача.
- * <p>
- * Основна мета цього класу — надати швидкий та інтуїтивний доступ
- * до найважливішої функції системи: створення нового замовлення (Сценарій ВВ1).
+ * Відображає інтерактивну бізнес-статистику та кнопку швидкого старту.
  */
 public class DashboardPanel extends JPanel {
 
-    /**
-     * Посилання на батьківське вікно (MainFrame).
-     * Необхідне для того, щоб діалогові вікна (наприклад, OrderDialog)
-     * відкривалися як модальні відносно центру програми.
-     */
     private final JFrame parentFrame;
-
-    /**
-     * Посилання на контролер даних.
-     * Передається далі у діалогові вікна для збереження нових замовлень.
-     */
     private final OrderController orderController;
+
+    // Мітки для динамічного оновлення статистики через refreshStats()
+    private JLabel clientsStatLabel;
+    private JLabel ordersStatLabel;
+    private JLabel revenueStatLabel;
 
     /**
      * Конструктор панелі Dashboard.
-     * Налаштовує візуальний стиль, шрифти та розміщує велику кнопку "Нове замовлення"
-     * по центру екрану.
-     *
-     * @param parentFrame посилання на головне вікно програми.
-     * @param orderController екземпляр менеджера даних.
      */
     public DashboardPanel(JFrame parentFrame, OrderController orderController) {
         this.parentFrame = parentFrame;
         this.orderController = orderController;
-        setLayout(new BorderLayout());
 
-        // Робимо панель прозорою, щоб було видно фон батьківського контейнера (якщо є)
-        setOpaque(false);
+        setLayout(new BorderLayout(0, 30));
+        setBorder(new javax.swing.border.EmptyBorder(10, 10, 10, 10));
+        setBackground(new Color(245, 245, 250)); // Світлий сучасний фон
 
-        // --- Верхня частина: Вітання ---
-        JLabel welcomeLabel = new JLabel("Вітаємо в системі управління!", JLabel.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        welcomeLabel.setForeground(new Color(60, 60, 60)); // Темно-сірий колір для тексту
+        // --- 1. ВЕРХНЯ ЧАСТИНА: Вітання ---
+        JLabel welcomeLabel = new JLabel("Система управління фотостудією", JLabel.CENTER);
+        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        welcomeLabel.setForeground(new Color(45, 55, 72));
         add(welcomeLabel, BorderLayout.NORTH);
 
-        // --- Центральна частина: Кнопка дії ---
-        // Використовуємо GridBagLayout для центрування кнопки по вертикалі та горизонталі
-        JPanel centerPanel = new JPanel(new GridBagLayout());
-        centerPanel.setOpaque(false);
+        // --- 2. ЦЕНТРАЛЬНА ЧАСТИНА: Панелі статистики (KPI Cards) ---
+        JPanel statsContainer = new JPanel(new GridLayout(1, 3, 20, 0));
+        statsContainer.setOpaque(false);
 
-        JButton newOrderBtn = new JButton("+ НОВЕ ЗАМОВЛЕННЯ");
-        newOrderBtn.setPreferredSize(new Dimension(300, 80)); // Велика зручна кнопка
-        newOrderBtn.setFont(new Font("Arial", Font.BOLD, 20));
-        newOrderBtn.setBackground(new Color(40, 167, 69)); // Зелений колір (успіх/дія)
-        newOrderBtn.setForeground(Color.BLACK);
-        newOrderBtn.setFocusPainted(false); // Прибирає рамку фокусу при натисканні
+        // Ініціалізація карток
+        clientsStatLabel = new JLabel("0", JLabel.CENTER);
+        ordersStatLabel = new JLabel("0", JLabel.CENTER);
+        revenueStatLabel = new JLabel("0.00 грн", JLabel.CENTER);
 
-        // Прив'язка події натискання до методу openOrderDialog
+        statsContainer.add(createCard("Клієнтів у базі", clientsStatLabel, new Color(66, 153, 225)));
+        statsContainer.add(createCard("Всього замовлень", ordersStatLabel, new Color(72, 187, 120)));
+        statsContainer.add(createCard("Загальний виторг", revenueStatLabel, new Color(236, 159, 5)));
+
+        add(statsContainer, BorderLayout.CENTER);
+
+        // --- 3. НИЖНЯ ЧАСТИНА: Велика кнопка швидкої дії ---
+        JPanel bottomPanel = new JPanel(new GridBagLayout());
+        bottomPanel.setOpaque(false);
+
+        JButton newOrderBtn = new JButton("+ СТВОРИТИ НОВЕ ЗАМОВЛЕННЯ");
+        newOrderBtn.setPreferredSize(new Dimension(350, 70));
+        newOrderBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        newOrderBtn.setBackground(new Color(40, 167, 69));
+        newOrderBtn.setForeground(Color.WHITE); // Білий текст на зеленому виглядає значно краще
+        newOrderBtn.setFocusPainted(false);
+        newOrderBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
         newOrderBtn.addActionListener(e -> openOrderDialog());
 
-        centerPanel.add(newOrderBtn);
-        add(centerPanel, BorderLayout.CENTER);
+        bottomPanel.add(newOrderBtn);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Первинний прорахунок метрик при запуску
+        refreshStats();
     }
 
     /**
-     * Відкриває модальне вікно для створення нового замовлення.
-     * <p>
-     * Перед відкриттям виконує бізнес-перевірку: чи існують у системі фотографи.
-     * Замовлення неможливо створити без виконавця, тому якщо база фотографів порожня,
-     * користувачеві буде показано попередження замість діалогу замовлення.
+     * Допоміжний метод для швидкого збирання гарних карток метрик.
      */
+    private JPanel createCard(String title, JLabel valueLabel, Color accentColor) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(new LineBorder(new Color(226, 232, 240), 1, true));
+
+        // Верхня кольорова смужка для акценту
+        JPanel topStrip = new JPanel();
+        topStrip.setBackground(accentColor);
+        topStrip.setPreferredSize(new Dimension(0, 5));
+        card.add(topStrip, BorderLayout.NORTH);
+
+        JPanel body = new JPanel(new GridLayout(2, 1));
+        body.setOpaque(false);
+        body.setBorder(new javax.swing.border.EmptyBorder(15, 10, 15, 10));
+
+        JLabel titleLabel = new JLabel(title, JLabel.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        titleLabel.setForeground(new Color(113, 128, 150));
+
+        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        valueLabel.setForeground(new Color(45, 55, 72));
+
+        body.add(titleLabel);
+        body.add(valueLabel);
+        card.add(body, BorderLayout.CENTER);
+
+        return card;
+    }
+
+    /**
+     * ВИПРАВЛЕНО: Метод динамічного оновлення фінансових та кількісних показників.
+     * Викликається автоматично головним вікном MainFrame при переході на цю вкладку.
+     */
+    public void refreshStats() {
+        try {
+            int clientsCount = orderController.getClientsCount();
+            int ordersCount = orderController.getOrdersCount();
+            double totalRevenue = orderController.getTotalRevenue();
+
+            clientsStatLabel.setText(String.valueOf(clientsCount));
+            ordersStatLabel.setText(String.valueOf(ordersCount));
+            revenueStatLabel.setText(String.format("%.2f грн", totalRevenue));
+        } catch (Exception e) {
+            System.err.println("Помилка оновлення дашборду: " + e.getMessage());
+        }
+    }
+
     private void openOrderDialog() {
-        // Валідація передумов (Pre-condition check)
         if (orderController.getPhotographers().isEmpty()) {
             JOptionPane.showMessageDialog(parentFrame,
-                    "Спочатку додайте фотографів у систему (вкладка 'Управління' або програмно)!",
+                    "Спочатку додайте фотографів у систему за допомогою консолі або міграцій БД!",
                     "Увага",
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Створення та відображення діалогу
         OrderDialog dialog = new OrderDialog(parentFrame, orderController);
         dialog.setVisible(true);
+
+        // Якщо замовлення успішно створено, відразу оновлюємо цифри на екрані
+        if (dialog.isSucceeded()) {
+            refreshStats();
+        }
     }
 }

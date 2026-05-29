@@ -1,17 +1,18 @@
 package com.example.entity;
 
-import com.example.service.Schedule;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
  * Клас, що представляє співробітника-фотографа у системі.
  * Успадковує базові властивості людини від класу {@link Person}.
- * Реалізує принцип композиції, включаючи об'єкт {@link Schedule} як не від'ємну частину.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 public class Photographer extends Person implements Serializable {
 
     /**
@@ -21,15 +22,11 @@ public class Photographer extends Person implements Serializable {
     private String specialization;
     private double baseRate;
 
-    /**
-     * Особистий графік роботи фотографа.
-     * Реалізує композицію: графік створюється разом з фотографом і не існує окремо.
-     */
-    private Schedule schedule;
+
 
     /**
      * Конструктор для створення нового фотографа.
-     * Ініціалізує персональні дані та створює новий порожній розклад.
+     * Ініціалізує персональні дані
      *
      * @param name           ПІБ фотографа.
      * @param phoneNumber    Контактний номер телефону.
@@ -40,11 +37,10 @@ public class Photographer extends Person implements Serializable {
         this.specialization = specialization;
         this.baseRate = baseRate;
         // Об'єкт розкладу створюється разом з фотографом (жорстка композиція)
-        this.schedule = new Schedule();
     }
     /**
      * Конструктор для запису нового фотографа.
-     * Ініціалізує персональні дані та створює новий порожній розклад.
+     * Ініціалізує персональні дані
      *
      * @param name           ПІБ фотографа.
      * @param phoneNumber    Контактний номер телефону.
@@ -54,8 +50,6 @@ public class Photographer extends Person implements Serializable {
         super(id, name, phoneNumber); // Виклик конструктора базового класу Person
         this.specialization = specialization;
         this.baseRate = baseRate;
-        // Об'єкт розкладу створюється разом з фотографом (жорстка композиція)
-        this.schedule = new Schedule();
     }
 
     /**

@@ -1,11 +1,10 @@
 package com.example.dataDB.storage;
 
-import com.example.control.DatabaseManager;
 import com.example.dataDB.DataBaseConnection;
 import com.example.entity.Client;
 import com.example.entity.Photographer;
-import com.example.model.Order;
-import com.example.service.SessionType;
+import com.example.entity.Order;
+import com.example.entity.SessionType;
 import com.example.util.OrderStatus;
 
 import java.sql.*;
@@ -46,7 +45,7 @@ public class OrderDAO {
             try (var generatedKeys = psmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     long generatedId = generatedKeys.getLong(1);
-                    order.setId(generatedId); // Тепер об'єкт в Java має той самий ID, що й у PostgreSQL!
+                    order.setId(generatedId);
                     System.out.println("Ордер створено в БД з ID: " + generatedId);
                 } else {
                     throw new SQLException("Не вдалося отримати згенерований ID для замовлення.");
@@ -77,7 +76,7 @@ public class OrderDAO {
         }
     }
 
-    public List<Order> getAllOrders(){
+    public List<Order> getAllOrders() {
         List<Order> orders = new ArrayList<>();
         String sql = """
                 SELECT o.*,
@@ -89,26 +88,32 @@ public class OrderDAO {
                 JOIN photographer p ON o.photographer_id = p.id
                 JOIN session_type s ON o.session_id = s.id
                 """;
-        try(Connection connectionq = DataBaseConnection.getConnection();
-        PreparedStatement pstmt = connectionq.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery()){
+        try (Connection connectionq = DataBaseConnection.getConnection();
+             PreparedStatement pstmt = connectionq.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 Client client = new Client(rs.getLong("cid"), rs.getString("cname"), rs.getString("cphone"),
                         rs.getString("cemail"), rs.getBoolean("is_regular_client"), rs.getDouble("discount_rate"));
                 Photographer photographer = new Photographer(rs.getLong("pid"), rs.getString("pname"), rs.getString("pphone"),
-                        rs.getString("specialization"),rs.getDouble("base_rate"));
+                        rs.getString("specialization"), rs.getDouble("base_rate"));
                 SessionType sessionType = new SessionType(rs.getLong("sid"), rs.getString("session_name"),
-                        rs.getInt("durations_hours"),rs.getDouble("price"));
+                        rs.getInt("durations_hours"), rs.getDouble("price"));
 
-                Order order = new Order(client, photographer, sessionType, rs.getTimestamp("event_date"), rs.getTimestamp("delivery_date"));
-                order.setId(rs.getLong("id"));
-                order.setCreatedDate(rs.getTimestamp("created_date"));
-                order.setStatus(OrderStatus.valueOf(rs.getString("order_status")));
-                order.setTotalCost(rs.getDouble("total_cost"));
+                Order order = new Order(
+                        rs.getLong("id"),
+                        client,
+                        photographer,
+                        sessionType,
+                        rs.getTimestamp("created_date"),
+                        rs.getTimestamp("event_date"),
+                        rs.getTimestamp("delivery_date"),
+                        OrderStatus.valueOf(rs.getString("order_status")),
+                        rs.getDouble("total_cost"));
 
-                orders.add(order);            }
+                orders.add(order);
+            }
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return orders;
@@ -127,12 +132,12 @@ public class OrderDAO {
                         order_status varchar(20) not null,
                         total_cost decimal (20,2) not null);
                 """;
-        try(Connection connection = DataBaseConnection.getConnection();
-        Statement stmt = connection.createStatement()){
+        try (Connection connection = DataBaseConnection.getConnection();
+             Statement stmt = connection.createStatement()) {
 
             stmt.execute(sql);
             System.out.println("Таблиця створена");
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.err.println("Помилка при створенні таблиці: " + e.getMessage());
             throw new RuntimeException(e);
         }

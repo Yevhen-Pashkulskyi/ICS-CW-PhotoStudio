@@ -2,39 +2,53 @@ package com.example.model;
 
 import com.example.entity.Client;
 import com.example.entity.Photographer;
-import com.example.service.SessionType;
+import com.example.entity.Order;
+import com.example.entity.SessionType;
 import org.junit.jupiter.api.Test;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTest {
 
     @Test
     public void testOrderCalculationSimple() {
-        // 1. Підготовка даних
-        Client client = new Client("Test Client", "000", "mail", false); // Новий клієнт
-        Photographer photographer = new Photographer("Photo Man", "111", "General");
-        SessionType session = new SessionType("Portrait", 1000.0);
+        // 1. Підготовка даних (Новий клієнт, знижка 0%)
+        Client client = new Client("Новий Клієнт", "0931112233", "new@mail.com", false, 0.0);
+        Photographer photographer = new Photographer("Петро","0931111111", "Портрети",500.0);
+        SessionType session = new SessionType(1L, "Портрет", 2, 1200.0);
 
-        // 2. Дія
-        Order order = new Order(client, photographer, session);
+        // 2. Створення замовлення
+        Order order = new Order();
+        order.setClient(client);
+        order.setPhotographer(photographer);
+        order.setSessionType(session);
+        order.setEventDate(Timestamp.valueOf(LocalDateTime.now()));
 
-        // 3. Перевірка (Assert)
-        // Очікуємо 1000.0, бо клієнт новий (без знижки)
-        assertEquals(1000.0, order.getTotalCost(), 0.01);
+        // Викликаємо твій метод розрахунку вартості
+        double finalCost = order.calculateTotalCost();
+
+        // 3. Перевірка: Очікуємо повну вартість 1200.0, бо знижка 0%
+        assertEquals(1200.0, finalCost, 0.01);
     }
 
     @Test
     public void testOrderCalculationDiscount() {
-        // 1. Підготовка (Клієнт ПОСТІЙНИЙ - true)
-        Client regularClient = new Client("Regular Client", "000", "mail", true);
-        Photographer photographer = new Photographer("Photo Man", "111", "General");
-        SessionType session = new SessionType("Wedding", 5000.0);
+        // 1. Підготовка (Постійний клієнт, знижка 10%)
+        Client regularClient = new Client("Постійний Клієнт", "0935556677", "regular@mail.com", true, 10.0);
+        Photographer photographer = new Photographer("Марія","0937777777", "Весілля",600.0);
+        SessionType session = new SessionType(2L, "Весілля", 5, 5000.0);
 
         // 2. Дія
-        Order order = new Order(regularClient, photographer, session);
+        Order order = new Order();
+        order.setClient(regularClient);
+        order.setPhotographer(photographer);
+        order.setSessionType(session);
 
-        // 3. Перевірка
-        // Очікуємо знижку 10%: 5000 - 500 = 4500
-        assertEquals(4500.0, order.getTotalCost(), 0.01);
+        double finalCost = order.calculateTotalCost();
+
+        // 3. Перевірка: 5000 - 10% (500) = 4500.0
+        assertEquals(4500.0, finalCost, 0.01);
     }
 }

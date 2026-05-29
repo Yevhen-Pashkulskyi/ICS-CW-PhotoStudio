@@ -1,102 +1,59 @@
 package com.example.ui;
 
-import com.example.control.DatabaseManager;
 import com.example.control.OrderController;
 import com.example.entity.Client;
 import com.example.entity.Photographer;
-import com.example.model.Order;
-import com.example.service.SessionType;
+import com.example.entity.Order;
+import com.example.entity.SessionType;
 import com.example.ui.util.Validate;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Модальне діалогове вікно для створення нового замовлення (Реалізація Сценарію ВВ1).
- * <p>
- * Надає інтерфейс для:
- * <ul>
- * <li>Введення даних клієнта (Ім'я, телефон, email).</li>
- * <li>Вибору типу фотосесії (з автоматичним розрахунком ціни).</li>
- * <li>Вибору фотографа зі списку доступних.</li>
- * </ul>
- * При підтвердженні створює об'єкт {@link Order}, генерує тестові фотографії
- * та зберігає дані через {@link DatabaseManager}.
+ * Модальне діалогове вікно для створення нового замовлення
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
 public class OrderDialog extends JDialog {
 
-    /**
-     * Посилання на центральний контролер даних.
-     */
+    /** Посилання на центральний контролер даних. */
     private final OrderController orderController;
 
-    /**
-     * Прапорець успішного завершення операції (true, якщо натиснуто "Підтвердити").
-     */
+//    Прапорець успішного завершення операції.
+
+    @Getter
     private boolean succeeded = false;
 
     // --- Компоненти форми ---
-
-    /**
-     * Поле введення імені клієнта.
-     */
     private final JTextField clientNameField;
-
-    /**
-     * Поле введення телефону (ключовий атрибут для пошуку клієнта).
-     */
     private final JTextField clientPhoneField;
-
-    /**
-     * Поле введення електронної пошти.
-     */
     private final JTextField clientEmailField;
-
-    /**
-     * Випадаючий список типів фотосесій (заповнюється об'єктами {@link SessionType}).
-     */
     private final JComboBox<SessionType> sessionTypeBox;
-
-    /**
-     * Випадаючий список фотографів (заповнюється об'єктами {@link Photographer}).
-     */
     private final JComboBox<Photographer> photographerBox;
-
-    /**
-     * Мітка для динамічного відображення розрахованої вартості.
-     */
     private final JLabel priceLabel;
-
-    private JSpinner eventDateSpinner;
-    private JSpinner deliveryDateSpinner;
+    private final JSpinner eventDateSpinner;
+    private final JSpinner deliveryDateSpinner;
 
     /**
      * Конструктор діалогового вікна.
-     * Ініціалізує розмітку, створює поля введення та заповнює списки даними.
-     *
-     * @param parent          Батьківське вікно (для модальності).
-     * @param orderController Екземпляр менеджера даних.
      */
     public OrderDialog(Frame parent, OrderController orderController) {
-        super(parent, "Створення нового замовлення", true); // true = модальне вікно
+        super(parent, "Створення нового замовлення", true);
         this.orderController = orderController;
 
-        setSize(450, 550);
-        setLocationRelativeTo(parent); // Центрування відносно батьківського вікна
+        setSize(460, 600);
+        setLocationRelativeTo(parent);
         setLayout(new BorderLayout());
 
         // Головна панель з вертикальним розташуванням елементів
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20)); // Відступи
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // --- БЛОК 1: КЛІЄНТ ---
         mainPanel.add(createHeader("1. Дані Клієнта"));
@@ -106,9 +63,9 @@ public class OrderDialog extends JDialog {
         clientPhoneField = addField(mainPanel, "Телефон:");
         clientEmailField = addField(mainPanel, "Email:");
 
-        mainPanel.add(Box.createVerticalStrut(20));
-        mainPanel.add(new JSeparator()); // Розділова лінія
-        mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(Box.createVerticalStrut(15));
+        mainPanel.add(new JSeparator());
+        mainPanel.add(Box.createVerticalStrut(15));
 
         // --- БЛОК 2: ЗАМОВЛЕННЯ ---
         mainPanel.add(createHeader("2. Деталі Замовлення"));
@@ -118,8 +75,6 @@ public class OrderDialog extends JDialog {
         mainPanel.add(new JLabel("Тип фотосесії:"));
         sessionTypeBox = new JComboBox<>();
         fillSessionTypes();
-
-        // Додавання слухача для оновлення ціни при зміні вибору
         sessionTypeBox.addActionListener(e -> updatePrice());
         mainPanel.add(sessionTypeBox);
 
@@ -131,48 +86,49 @@ public class OrderDialog extends JDialog {
         fillPhotographers();
         mainPanel.add(photographerBox);
 
-        // Налаштування поля "Дата події"
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // Налаштування полів дат через Spinner
+        mainPanel.add(new JLabel("Дата та час події:"));
         SpinnerDateModel eventModel = new SpinnerDateModel();
         eventDateSpinner = new JSpinner(eventModel);
         eventDateSpinner.setEditor(new JSpinner.DateEditor(eventDateSpinner, "yyyy-MM-dd HH:mm"));
+        mainPanel.add(eventDateSpinner);
 
-// Налаштування поля "Дата доставки"
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(new JLabel("Дата здачі матеріалу:"));
         SpinnerDateModel deliveryModel = new SpinnerDateModel();
         deliveryDateSpinner = new JSpinner(deliveryModel);
         deliveryDateSpinner.setEditor(new JSpinner.DateEditor(deliveryDateSpinner, "yyyy-MM-dd HH:mm"));
-
-// Додаємо на панель (зміни під свій Layout)
-        mainPanel.add(new JLabel("Дата та час події:"));
-        mainPanel.add(eventDateSpinner);
-        mainPanel.add(new JLabel("Дата здачі матеріалу:"));
         mainPanel.add(deliveryDateSpinner);
 
         mainPanel.add(Box.createVerticalStrut(20));
 
-        // Відображення ціни
-        priceLabel = new JLabel("До сплати: 0.0 грн");
+        // Відображення базової ціни
+        priceLabel = new JLabel("До сплати: 0.00 грн");
         priceLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        priceLabel.setForeground(new Color(0, 100, 0)); // Темно-зелений колір
+        priceLabel.setForeground(new Color(0, 100, 0));
         priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         mainPanel.add(priceLabel);
 
         add(mainPanel, BorderLayout.CENTER);
 
         // --- Панель кнопок (OK / Cancel) ---
-        var btnPanel = getJPanel();
+        JPanel btnPanel = createButtonPanel();
         add(btnPanel, BorderLayout.SOUTH);
 
-        // Розрахунок ціни для початкового вибору
+        // Початковий розрахунок ціни
         updatePrice();
     }
 
-    private JPanel getJPanel() {
+    private JPanel createButtonPanel() {
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton cancelBtn = new JButton("Скасувати");
         cancelBtn.addActionListener(e -> dispose());
 
         JButton okBtn = new JButton("Підтвердити замовлення");
-        okBtn.setBackground(new Color(40, 167, 69)); // Стилізація під "Успіх"
+        okBtn.setBackground(new Color(40, 167, 69));
         okBtn.setForeground(Color.BLACK);
         okBtn.setFont(new Font("Arial", Font.BOLD, 12));
         okBtn.addActionListener(e -> onConfirm());
@@ -184,12 +140,6 @@ public class OrderDialog extends JDialog {
 
     // --- Допоміжні методи UI ---
 
-    /**
-     * Створює стилізований заголовок секції.
-     *
-     * @param text Текст заголовка.
-     * @return налаштований JLabel.
-     */
     private JLabel createHeader(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 14));
@@ -198,13 +148,6 @@ public class OrderDialog extends JDialog {
         return label;
     }
 
-    /**
-     * Додає пару "Мітка + Текстове поле" на панель.
-     *
-     * @param panel     Панель-контейнер.
-     * @param labelText Текст мітки.
-     * @return Посилання на створене текстове поле.
-     */
     private JTextField addField(JPanel panel, String labelText) {
         JLabel label = new JLabel(labelText);
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -218,18 +161,12 @@ public class OrderDialog extends JDialog {
         return field;
     }
 
-    /**
-     * Заповнює випадаючий список типів сесій даними з DataManager.
-     */
     private void fillSessionTypes() {
         for (SessionType st : orderController.getSessionTypes()) {
             sessionTypeBox.addItem(st);
         }
     }
 
-    /**
-     * Заповнює випадаючий список фотографів даними з DataManager.
-     */
     private void fillPhotographers() {
         List<Photographer> list = orderController.getPhotographers();
         if (list.isEmpty()) {
@@ -241,39 +178,22 @@ public class OrderDialog extends JDialog {
         }
     }
 
-    /**
-     * Оновлює текст мітки ціни на основі обраного типу фотосесії.
-     * Викликається автоматично при зміні значення в JComboBox.
-     */
     private void updatePrice() {
         SessionType selected = (SessionType) sessionTypeBox.getSelectedItem();
         if (selected != null) {
-            priceLabel.setText("До сплати: " + selected.getPrice() + " грн");
+            priceLabel.setText(String.format("До сплати (базова): %.2f грн", selected.getPrice()));
         }
     }
 
     // --- ЛОГІКА ОБРОБКИ ПОДІЙ ---
 
-    /**
-     * Обробляє натискання кнопки "Підтвердити замовлення".
-     * <p>
-     * Алгоритм:
-     * <ol>
-     * <li>Валідація вхідних даних (існування імені, телефону, фотографа).</li>
-     * <li>Пошук клієнта в базі або створення нового.</li>
-     * <li>Створення об'єкта Order.</li>
-     * <li>Генерація тестових фотографій (імітація роботи фотографа).</li>
-     * <li>Збереження замовлення через DataManager.</li>
-     * </ol>
-     */
     private void onConfirm() {
         String name = clientNameField.getText().trim();
         String phone = clientPhoneField.getText().trim();
         String email = clientEmailField.getText().trim();
-        // 1. Валідація
-        Validate validate = new Validate();
-        // 1. Перевірка
-        if (validate.validateAll(name, phone, email)) return;
+
+        // 1. Валідація текстових полів
+        if (Validate.validateAll(this, name, phone, email)) return;
 
         if (photographerBox.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "Оберіть фотографа!", "Помилка", JOptionPane.WARNING_MESSAGE);
@@ -281,70 +201,77 @@ public class OrderDialog extends JDialog {
         }
 
         Photographer selectedPhotographer = (Photographer) photographerBox.getSelectedItem();
+        SessionType session = (SessionType) sessionTypeBox.getSelectedItem();
 
-        // 1. Отримуємо обрані дати з JSpinner
+        // Зчитування дат зі Spinner
         java.util.Date eventUtilDate = (java.util.Date) eventDateSpinner.getValue();
         java.util.Date deliveryUtilDate = (java.util.Date) deliveryDateSpinner.getValue();
 
-        // Конвертуємо їх у Timestamp для конструктора Order та БД
         Timestamp eventDate = new Timestamp(eventUtilDate.getTime());
         Timestamp deliveryDate = new Timestamp(deliveryUtilDate.getTime());
-
-        // Оскільки замовлення створюється на "зараз", перевіряємо поточний час
         LocalDateTime eventDateTime = eventDate.toLocalDateTime();
-        // Отримуємо список вільних фотографів на цей час
+
+        // Додаткова перевірка: чи не в минулому часі призначено зйомку
+        if (eventDateTime.isBefore(LocalDateTime.now())) {
+            JOptionPane.showMessageDialog(this, "Дата події не може бути в минулому!", "Помилка дати", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (deliveryDate.before(eventDate)) {
+            JOptionPane.showMessageDialog(this, "Дата здачі матеріалу не може бути раніше за саму зйомку!", "Помилка дати", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Перевірка зайнятості фотографа
         List<Photographer> freePhotographers = orderController.getAvailablePhotographers(eventDateTime);
-        // Перевіряємо, чи є наш обраний фотограф у списку вільних
-        // (порівнюємо за ID, щоб уникнути помилок посилань)
         boolean isBusy = freePhotographers.stream()
                 .noneMatch(p -> p.getId().equals(selectedPhotographer.getId()));
 
         if (isBusy) {
             JOptionPane.showMessageDialog(this,
                     "Увага! Фотограф " + selectedPhotographer.getFullName() +
-                            " вже зайнятий на цей час (" + eventDateTime.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + ").\n" +
-                            "Оберіть іншого фахівця або іншу дату події.",
+                            " вже зайнятий на цей час (" + eventDateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + ").\n" +
+                            "Оберіть іншого фахівця або змініть дату події.",
                     "Фотограф зайнятий",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-        // 2. Пошук або створення клієнта (через DataManager!)
-        Client client = orderController.findClient(phone);
 
+        // 2. Пошук або створення клієнта
+        Client client = orderController.findClient(phone);
         if (client == null) {
             client = new Client(name, phone, email, false, 0.0);
             orderController.addClient(client);
         }
 
-        // 3. Отримання обраних об'єктів
-        SessionType session = (SessionType) sessionTypeBox.getSelectedItem();
+        // 3. Створення замовлення та РОЗРАХУНОК ЗНИЖКИ (Виправлено бізнес-логіку)
+        Order order = new Order(client, selectedPhotographer, session, eventDate, deliveryDate);
 
-        // 4. Створення замовлення
-        Order order = new Order(client, selectedPhotographer, session, eventDate,
-                deliveryDate);
-        order.setTotalCost(session.getPrice());
-
-        // Імітація процесу зйомки: генеруємо випадкову кількість фото від 3 до 10. Це поки але я створю надалі папку і там будуть реальні фото
-//        int photoCount = 3 + (int) (Math.random() * 8);
-
-//        List<String> fakePhotosPaths = new ArrayList<>();
-//        for (int i = 1; i <= photoCount; i++) {
-//            String fileName = "IMG_" + (1000 + (int) (Math.random() * 9000)) + ".JPG";
-//            fakePhotosPaths.add(fileName);
-//        }
+        double basePrice = session.getPrice();
+        double discountRate = client.getDiscountRate(); // Наприклад, 10.0 (%)
+        double finalCost = basePrice * (1.0 - (discountRate / 100.0));
+        order.setTotalCost(finalCost);
 
         order.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+
         try {
-            // Збереження в систему
+            // Зберігаємо замовлення
             orderController.addOrder(order);
             succeeded = true;
-            JOptionPane.showMessageDialog(this, "Замовлення успішно створено!\nНомер: " + order.getId());
-            dispose(); // Закриття вікна
+
+            // Гарне інформаційне повідомлення для користувача
+            String successMsg = "Замовлення успішно створено!\nНомер: " + order.getId() +
+                    String.format("\nФінальна вартість: %.2f грн", finalCost);
+            if (discountRate > 0) {
+                successMsg += String.format(" (Враховано знижку клієнта %.0f%%)", discountRate);
+            }
+
+            JOptionPane.showMessageDialog(this, successMsg, "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Помилка при збереженні замовлення: " + e.getMessage(),
                     "Помилка БД", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
-
     }
+
 }

@@ -17,14 +17,21 @@ public class PaymentDAO {
                 values (?, ?, ?, ?);
                 """;
         try(Connection connection = DataBaseConnection.getConnection();
-            PreparedStatement psmt = connection.prepareStatement(sql)){
+            PreparedStatement psmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+
             psmt.setLong(1, payment.getOrderId().getId());
             psmt.setDouble(2, payment.getPaymentAmount());
             psmt.setTimestamp(3, payment.getPaymentDate());
             psmt.setString(4, payment.getPaymentMethod().toString());
 
             psmt.executeUpdate();
-            System.out.println("Платіж успішно збережено!");
+
+            try (var generatedKeys = psmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    payment.setId(generatedKeys.getLong(1));
+                    System.out.println("Платіж успішно збережено з ID: " + payment.getId());
+                }
+            }
 
         }catch (SQLException e){
             System.err.println("Помилка при збереженні оплати: " + e.getMessage());
@@ -39,7 +46,7 @@ public class PaymentDAO {
                 order_id bigint not null references orders(id),
                 payment_amount decimal(20,2) not null,
                 payment_date timestamp not null,
-                payment_method varchar(12) not null);
+                payment_method varchar(50) not null);
         """;
         try(Connection connection = DataBaseConnection.getConnection();
             Statement stmt = connection.createStatement()){

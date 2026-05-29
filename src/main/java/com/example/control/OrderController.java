@@ -1,16 +1,17 @@
 package com.example.control;
 
-import com.example.dataDB.storage.ClientDAO;
-import com.example.dataDB.storage.PhotoDAO;
 import com.example.entity.Client;
 import com.example.entity.Photo;
 import com.example.entity.Photographer;
-import com.example.model.Order;
-import com.example.service.SessionType;
+import com.example.entity.Payment;
+import com.example.entity.Order;
+import com.example.entity.SessionType;
 import com.example.util.OrderStatus;
+import com.example.util.PaymentMethod;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -20,23 +21,16 @@ import java.util.stream.Collectors;
 public class OrderController {
 
     @Getter
-    private final DatabaseManager dbManager;
+    private final DatabaseManager databaseManager;
 
-    public OrderController(DatabaseManager dbManager) {
-        this.dbManager = dbManager;
+    public OrderController(DatabaseManager databaseManager) {
+        this.databaseManager = databaseManager;
     }
 
-    // Метод з діаграми: пошук клієнта
     public Client findClient(String phone) {
-        return dbManager.getClientByPhone(phone);
+        return databaseManager.getClientByPhone(phone);
     }
 
-    // Метод з діаграми: створення нового замовлення (відкриття форми/діалогу)
-    public void newOrder() {
-        System.out.println("Ініціалізація нового замовлення...");
-    }
-
-    // Метод з діаграми: вільні фотографи
     public List<Photographer> getAvailablePhotographers(LocalDateTime dateTime){
         List<Order> orders = getOrders();
         return getPhotographers().stream()
@@ -46,44 +40,53 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
-    // Метод з діаграми: розрахунок вартості
-    public double calculateCost(Long sessionId, Long clientId) {
-        // Шукаємо сесію і клієнта через dbManager, рахуємо ціну зі знижкою
-        double basePrice = 1000.0; // Приклад завантаженої базової ціни
-        boolean isRegular = true;  // Приклад перевірки статусу клієнта
-
-        if (isRegular) {
-            return basePrice * 0.90;
-        }
-        return basePrice;
-    }
-
-    // Метод для створення нового замовлення (без фотографій)
     public void addOrder(Order order) {
-        boolean saved = dbManager.saveOrder(order);
-        if (saved) {
-            System.out.println("Нове замовлення успішно створено в системі!");
-        } else {
+        if (!databaseManager.saveOrder(order)) {
             throw new RuntimeException("Не вдалося зберегти замовлення в БД.");
         }
     }
 
-    // Метод з діаграми: фіналізація та збереження
-    public void finalizeOrder(Order order, List<String> photoPath) throws IOException {
-        boolean saved = dbManager.saveOrder(order);
-        if (saved) {
-            System.out.println("Замовлення успішно фіналізовано в системі!");
-        }
-        for (String path : photoPath) {
+    public void addClient(Client client) {
+        databaseManager.saveClient(client);
+    }
+
+    public void finalizeOrder(Order order, List<String> photoPaths) throws IOException {
+        addOrder(order); // Використовуємо вже існуючий метод
+        for (String path : photoPaths) {
             Photo photo = new Photo(path, order.getId());
-            new PhotoDAO().savePhoto(photo);
+            databaseManager.savePhoto(photo);
         }
     }
 
-    // --- ЗАЛИШАЄМО КОРИСНЕ ЗІ СТАРОЇ ПРОГРАМИ (Для ReportsPanel) ---
+    public void completeOrderPayment(Order order) throws Exception {
+        // 1. Змінюємо статус
+        order.setStatus(OrderStatus.PAID);
+        databaseManager.updateOrderStatus(order.getId(), OrderStatus.PAID);
+
+        // 2. РЕЗЕРВУЄМО ТА ЗБЕРІГАЄМО ПЛАТІЖ
+        Payment payment = new Payment();
+        payment.setOrderId(order);
+        payment.setPaymentAmount(order.getTotalCost());
+        payment.setPaymentDate(new Timestamp(System.currentTimeMillis()));
+        payment.setPaymentMethod(PaymentMethod.CASH); // Дефолт, або можна передавати з UI
+        databaseManager.savePayment(payment);
+
+        // 3. Програма лояльності
+        long paidOrdersCount = databaseManager.getAllOrders().stream()
+                .filter(o -> o.getClient().getId().equals(order.getClient().getId()))
+                .filter(o -> o.getStatus() == OrderStatus.PAID)
+                .count();
+
+        if (paidOrdersCount >= 3 && !order.getClient().isRegular()) {
+            order.getClient().setRegular(true);
+            order.getClient().setDiscountRate(10.0);
+            databaseManager.updateClient(order.getClient());
+        }
+    }
+
+    // --- Методи оперативної аналітики для ReportsPanel ---
 
     public long getActiveOrdersCount() {
-        // Рахуємо замовлення зі статусом NEW або IN_PROGRESS
         return getOrders().stream()
                 .filter(o -> o.getStatus() == OrderStatus.NEW || o.getStatus() == OrderStatus.IN_PROGRESS)
                 .count();
@@ -92,16 +95,16 @@ public class OrderController {
     public long getRegularClientsCount() {
         return getClients().stream().filter(Client::isRegular).count();
     }
+
     public long getNewClientsCount() {
         return getClients().stream().filter(c -> !c.isRegular()).count();
     }
 
     public List<Photo> getPhotosForOrder(Long orderId) {
-        return dbManager.getPhotosByOrderId(orderId);
+        return databaseManager.getPhotosByOrderId(orderId);
     }
 
     public double getTotalRevenue() {
-        // Рахуємо суму totalCost для замовлень за період
         return getOrders().stream()
                 .filter(o -> o.getStatus() == OrderStatus.PAID)
                 .mapToDouble(Order::getTotalCost)
@@ -116,42 +119,15 @@ public class OrderController {
                 .map(Map.Entry::getKey);
     }
 
-    // Геттери для Swing-таблиць, які тепер беруть дані через dbManager
-    public List<Client> getClients() { return dbManager.getAllClients(); }
-    public List<Order> getOrders() { return dbManager.getAllOrders(); }
-    public List<Photographer> getPhotographers() { return dbManager.getAllPhotographers(); }
-    public List<SessionType> getSessionTypes() { return dbManager.getAllSessionTypes(); }
-
-    public void addClient(Client client) {
-       new ClientDAO().saveClients(client);
+    public List<Client> getClients() { return databaseManager.getAllClients(); }
+    public List<Order> getOrders() { return databaseManager.getAllOrders(); }
+    public List<Photographer> getPhotographers() { return databaseManager.getAllPhotographers(); }
+    public List<SessionType> getSessionTypes() { return databaseManager.getAllSessionTypes(); }
+    public int getClientsCount() {
+        return databaseManager.getAllClients().size();
+    }
+    public int getOrdersCount() {
+        return databaseManager.getAllOrders().size();
     }
 
-    // Додай цей метод в свій OrderController
-    public void completeOrderPayment(Order order) throws Exception {
-        // 1. Змінюємо статус об'єкта в Java
-        order.setStatus(OrderStatus.PAID);
-
-        // 2. Оновлюємо статус замовлення в базі даних PostgreSQL через твій dbManager (або OrderDAO)
-        // Тобі знадобиться метод на кшталт dbManager.updateOrderStatus(order.getId(), OrderStatus.PAID);
-        dbManager.updateOrderStatus(order.getId(), OrderStatus.PAID);
-
-        // 3. Зберігаємо платіж в таблицю платежів (Payment)
-        // Новий об'єкт Payment передається в PaymentDAO
-        // new PaymentDAO().savePayment(new Payment(order.getId(), order.getTotalCost()));
-
-        // 4. Перевірка лояльності: рахуємо скільки всього ОПЛАЧЕНИХ замовлень у цього клієнта
-        long paidOrdersCount = dbManager.getAllOrders().stream()
-                .filter(o -> o.getClient().getId().equals(order.getClient().getId()))
-                .filter(o -> o.getStatus() == OrderStatus.PAID)
-                .count();
-
-        // Бізнес-правило: якщо це 3-є або більше оплачене замовлення — робимо його постійним
-        if (paidOrdersCount >= 3 && !order.getClient().isRegular()) {
-            order.getClient().setRegular(true);
-            order.getClient().setDiscountRate(10.0); // 10% знижки на майбутнє
-
-            // Оновлюємо клієнта в БД (робимо UPDATE в таблиці clients)
-             new ClientDAO().updateClient(order.getClient());
-        }
-    }
 }

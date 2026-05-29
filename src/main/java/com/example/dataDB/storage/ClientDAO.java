@@ -46,8 +46,7 @@ public class ClientDAO {
     public void updateClient(Client client) {
         String sql = """
                 update clients
-                set is_regular_client = ?
-                set discount_rate = ?
+                set is_regular_client = ?, discount_rate = ?
                 where id = ?
                 """;
         try(Connection connection = DataBaseConnection.getConnection();
@@ -55,6 +54,7 @@ public class ClientDAO {
 
             pstmt.setBoolean(1, client.isRegular());
             pstmt.setDouble(2, client.getDiscountRate());
+            pstmt.setLong(3, client.getId());
 
             pstmt.executeUpdate();
             System.out.printf("Данні %s успішно оновлені", client.getFullName());
@@ -101,9 +101,9 @@ public class ClientDAO {
             Statement stmt = connection.createStatement()){
 
             stmt.execute(sql);
-            System.out.println("Таблиця створена");
+            System.out.println("Таблиця clients створена (або вже існує)");
         }catch (SQLException e){
-            System.err.println("Помилка при створенні таблиці: " + e.getMessage());
+            System.err.println("Помилка при створенні таблиці clients: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

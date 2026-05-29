@@ -1,7 +1,7 @@
 package com.example.dataDB.storage;
 
 import com.example.dataDB.DataBaseConnection;
-import com.example.service.SessionType;
+import com.example.entity.SessionType;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class SessionTypeDAO {
                 values (?, ?, ?)
                 """;
         try(Connection connection = DataBaseConnection.getConnection();
-            PreparedStatement pstm = connection.prepareStatement(sql)){
+            PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstm.setString(1, sessionType.getSessionName());
             pstm.setInt(2,sessionType.getDurationHours());
@@ -23,6 +23,12 @@ public class SessionTypeDAO {
 
             pstm.executeUpdate();
 
+            try (var generatedKeys = pstm.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    sessionType.setId(generatedKeys.getLong(1));
+                }
+            }
+            System.out.println("Тип сесії успішно збережено з ID: " + sessionType.getId());
 
         }catch (SQLException e){
             System.err.println("Помилка при збереженні сесії: " + e.getMessage());
@@ -39,18 +45,17 @@ public class SessionTypeDAO {
         PreparedStatement pstm = connection.prepareStatement(sql);
         ResultSet rs = pstm.executeQuery()){
             while (rs.next()) {
-                SessionType st = new SessionType(
+                sessionTypeList.add(new SessionType(
+                        rs.getLong("id"),
                         rs.getString("session_name"),
                         rs.getInt("durations_hours"),
                         rs.getDouble("price")
-                );
-                st.setId(rs.getLong("id"));
-                sessionTypeList.add(st);
+                ));
             }
 
         }catch (SQLException e){
-            e.printStackTrace();
-        }
+            System.err.println("Помилка при завантаженні типів сесій: " + e.getMessage());
+            throw new RuntimeException(e);        }
 
         return   sessionTypeList;
     }

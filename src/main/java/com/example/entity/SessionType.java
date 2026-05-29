@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.entity;
 
 import java.io.Serializable;
 import lombok.*;

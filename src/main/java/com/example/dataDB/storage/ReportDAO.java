@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ReportDAO {
 
-    // Лістинг 2.1 – Список клієнтів заданого фотографа (наприклад, з ID = 1)
+    // Лістинг 2.1 – Список клієнтів заданого фотографа
     public List<String[]> getClientsByPhotographer(Long photographerId) {
         List<String[]> result = new ArrayList<>();
         String sql = """
@@ -23,18 +23,21 @@ public class ReportDAO {
             pstmt.setLong(1, photographerId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
+                    Timestamp evDate = rs.getTimestamp("event_date");
                     result.add(new String[]{
                             rs.getString("full_name"),
-                            rs.getTimestamp("event_date").toString(),
+                            evDate != null ? evDate.toString() : "Не вказано", // Безпечно до Null
                             rs.getString("session_name")
                     });
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.1", e);
+        }
         return result;
     }
 
-    // Лістинг 2.2 – Клієнти на літеру (наприклад, 'К%')
+    // Лістинг 2.2 – Клієнти на літеру
     public List<String[]> getClientsByLetter(String pattern) {
         List<String[]> result = new ArrayList<>();
         String sql = "SELECT full_name, phone, email FROM clients WHERE full_name LIKE ?;";
@@ -43,10 +46,16 @@ public class ReportDAO {
             pstmt.setString(1, pattern + "%");
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    result.add(new String[]{rs.getString("full_name"), rs.getString("phone"), rs.getString("email")});
+                    result.add(new String[]{
+                            rs.getString("full_name"),
+                            rs.getString("phone"),
+                            rs.getString("email")
+                    });
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.2", e);
+        }
         return result;
     }
 
@@ -60,13 +69,18 @@ public class ReportDAO {
             pstmt.setTimestamp(2, end);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
+                    Timestamp evDate = rs.getTimestamp("event_date");
                     result.add(new String[]{
-                            rs.getString("id"), rs.getString("client_id"),
-                            rs.getTimestamp("event_date").toString(), rs.getString("total_cost")
+                            String.valueOf(rs.getLong("id")),
+                            String.valueOf(rs.getLong("client_id")),
+                            evDate != null ? evDate.toString() : "",
+                            String.format("%.2f грн", rs.getDouble("total_cost"))
                     });
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.3", e);
+        }
         return result;
     }
 
@@ -76,8 +90,12 @@ public class ReportDAO {
         try (Connection conn = DataBaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) return rs.getInt("new_orders_count");
-        } catch (SQLException e) { e.printStackTrace(); }
+            if (rs.next()) {
+                return rs.getInt("new_orders_count");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.4", e);
+        }
         return 0;
     }
 
@@ -94,9 +112,11 @@ public class ReportDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                result.add(new String[]{rs.getString("full_name"), rs.getString("total_orders")});
+                result.add(new String[]{rs.getString("full_name"), String.valueOf(rs.getInt("total_orders"))});
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.5", e);
+        }
         return result;
     }
 
@@ -115,8 +135,12 @@ public class ReportDAO {
         try (Connection conn = DataBaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) { result.add(new String[]{rs.getString("full_name")}); }
-        } catch (SQLException e) { e.printStackTrace(); }
+            while (rs.next()) {
+                result.add(new String[]{rs.getString("full_name")});
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.6", e);
+        }
         return result;
     }
 
@@ -134,9 +158,15 @@ public class ReportDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                result.add(new String[]{rs.getString("specialization"), rs.getString("full_name"), rs.getString("base_rate")});
+                result.add(new String[]{
+                        rs.getString("specialization"),
+                        rs.getString("full_name"),
+                        String.format("%.2f грн", rs.getDouble("base_rate"))
+                });
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.7", e);
+        }
         return result;
     }
 
@@ -155,8 +185,12 @@ public class ReportDAO {
         try (Connection conn = DataBaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) { result.add(new String[]{rs.getString("full_name")}); }
-        } catch (SQLException e) { e.printStackTrace(); }
+            while (rs.next()) {
+                result.add(new String[]{rs.getString("full_name")});
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.8", e);
+        }
         return result;
     }
 
@@ -181,7 +215,9 @@ public class ReportDAO {
             while (rs.next()) {
                 result.add(new String[]{rs.getString("full_name"), rs.getString("status_comment")});
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Помилка формування звіту 2.9", e);
+        }
         return result;
     }
 }

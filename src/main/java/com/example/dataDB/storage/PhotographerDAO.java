@@ -16,8 +16,8 @@ public class PhotographerDAO {
                 values(?, ?, ?, ?)
                 """;
 
-        try(Connection connection = DataBaseConnection.getConnection();
-            PreparedStatement psmt = connection.prepareStatement(sql)){
+        try (Connection connection = DataBaseConnection.getConnection();
+             PreparedStatement psmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             psmt.setString(1, photographer.getFullName());
             psmt.setString(2, photographer.getPhone());
@@ -25,54 +25,60 @@ public class PhotographerDAO {
             psmt.setDouble(4, photographer.getBaseRate());
 
             psmt.executeUpdate();
-            System.out.println("Фотографа збережено");
 
-        }catch(SQLException e){
+            try (var generatedKeys = psmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    photographer.setId(generatedKeys.getLong(1));
+                }
+            }
+            System.out.println("Фотографа успішно збережено з ID: " + photographer.getId());
+
+        } catch (SQLException e) {
             System.err.println("Помилка при збереженні фотографа: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     public List<Photographer> getAllPhotographers() {
-        String  sql = """
-                select * from photographer;
-        """;
+        String sql = """
+                        select * from photographer;
+                """;
         List<Photographer> photographers = new ArrayList<>();
-        try(Connection connection = DataBaseConnection.getConnection();
-        PreparedStatement pstmt = connection.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery()) {
+        try (Connection connection = DataBaseConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 photographers.add(new Photographer(
-                        rs.getLong(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        rs.getString(4) ,
-                        rs.getDouble(5)
+                                rs.getLong("id"),
+                                rs.getString("full_name"),
+                                rs.getString("phone"),
+                                rs.getString("specialization"),
+                                rs.getDouble("base_rate")
                         )
 
                 );
             }
-        }catch (SQLException e){
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return photographers;
     }
 
     public void createTablePhotographer() {
         String sql = """
-            create table if not exists photographer(
-            id bigSerial primary key,
-            full_name varchar(255) not null,
-            phone varchar(255) not null,
-            specialization varchar(255) not null,
-            base_rate decimal(10,2) not null);
-        """;
-        try(Connection connection = DataBaseConnection.getConnection();
-            Statement stmt = connection.createStatement()){
+                    create table if not exists photographer(
+                    id bigSerial primary key,
+                    full_name varchar(255) not null,
+                    phone varchar(255) not null,
+                    specialization varchar(255) not null,
+                    base_rate decimal(10,2) not null);
+                """;
+        try (Connection connection = DataBaseConnection.getConnection();
+             Statement stmt = connection.createStatement()) {
 
             stmt.execute(sql);
             System.out.println("Таблиця створена");
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.err.println("Помилка при створенні таблиці: " + e.getMessage());
             throw new RuntimeException(e);
         }
