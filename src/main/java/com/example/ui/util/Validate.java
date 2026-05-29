@@ -32,7 +32,7 @@ public class Validate extends Component {
     }
 
     public boolean nameValidate(String name) {
-        return name.length() >= 2 && name.length() <= 20 && name.matches("[a-zA-Z]+");
+        return name.length() >= 2 && name.length() <= 20 && name.matches("^[A-Za-zА-Яа-яҐґЄєІіЇї'\\s]+$");
     }
 
     public boolean nameAndPhoneNotEmpty(String name, String phone) {
