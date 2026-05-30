@@ -51,4 +51,23 @@ public class OrderTest {
         // 3. Перевірка: 5000 - 10% (500) = 4500.0
         assertEquals(4500.0, finalCost, 0.01);
     }
+
+    @Test
+    public void testOrderCalculationNullClient() {
+        // 1. Підготовка даних: клієнта немає (null), але тип сесії коштує 1200.0
+        Client client = null;
+        Photographer photographer = null;
+        SessionType session = new SessionType(2L, "Весілля", 1, 1200.0);
+
+        Order order = new Order();
+        order.setClient(client);
+        order.setPhotographer(photographer);
+        order.setSessionType(session);
+
+        // 2. Дія: викликаємо прорахунок
+        double finalCost = order.calculateTotalCost();
+
+        // 3. Перевірка: очікуємо повну вартість 1200.0, бо код захищений від null і просто ігнорує знижку
+        assertEquals(1200.0, finalCost, 0.01, "Якщо клієнт відсутній (null), повинна повернутися повна вартість послуги");
+    }
 }
