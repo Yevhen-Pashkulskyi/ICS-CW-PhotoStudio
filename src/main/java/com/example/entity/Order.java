@@ -88,7 +88,7 @@ public class Order implements Serializable {
         double currentCost = sessionType.getPrice();
 
         // Використовуємо реальну знижку клієнта з БД (discountRate)
-        if (client.isRegular() && client.getDiscountRate() > 0) {
+        if (this.client != null && client.isRegular() && client.getDiscountRate() > 0) {
             double discountAmount = currentCost * (client.getDiscountRate() / 100.0);
             currentCost -= discountAmount;
         }
