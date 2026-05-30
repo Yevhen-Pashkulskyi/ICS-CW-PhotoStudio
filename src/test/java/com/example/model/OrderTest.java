@@ -5,6 +5,7 @@ import com.example.entity.Photographer;
 import com.example.entity.Order;
 import com.example.entity.SessionType;
 import org.junit.jupiter.api.Test;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -16,7 +17,7 @@ public class OrderTest {
     public void testOrderCalculationSimple() {
         // 1. Підготовка даних (Новий клієнт, знижка 0%)
         Client client = new Client("Новий Клієнт", "0931112233", "new@mail.com", false, 0.0);
-        Photographer photographer = new Photographer("Петро","0931111111", "Портрети",500.0);
+        Photographer photographer = new Photographer("Петро", "0931111111", "Портрети", 500.0);
         SessionType session = new SessionType(1L, "Портрет", 2, 1200.0);
 
         // 2. Створення замовлення
@@ -37,7 +38,7 @@ public class OrderTest {
     public void testOrderCalculationDiscount() {
         // 1. Підготовка (Постійний клієнт, знижка 10%)
         Client regularClient = new Client("Постійний Клієнт", "0935556677", "regular@mail.com", true, 10.0);
-        Photographer photographer = new Photographer("Марія","0937777777", "Весілля",600.0);
+        Photographer photographer = new Photographer("Марія", "0937777777", "Весілля", 600.0);
         SessionType session = new SessionType(2L, "Весілля", 5, 5000.0);
 
         // 2. Дія
