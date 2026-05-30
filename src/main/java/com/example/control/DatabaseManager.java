@@ -9,7 +9,6 @@ import com.example.entity.Order;
 import com.example.entity.SessionType;
 import com.example.util.OrderStatus;
 import lombok.Getter;
-import org.postgresql.core.ConnectionFactory;
 
 import java.util.List;
 
