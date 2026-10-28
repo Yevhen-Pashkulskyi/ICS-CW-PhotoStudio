@@ -9,6 +9,7 @@ target/
 .idea
 *.csv
 *.puml
+/.opencode
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
