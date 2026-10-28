@@ -36,7 +36,8 @@
 
 <!-- Головний екран (Hero) -->
 <section class="gradient-bg text-white pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <!-- сделай так что-бы фотография пропадала если ширина экрана меньше 400px -->
+    <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-12 items-center" style="@media (max-width: 400px) { display: none; }">
         
         <img src="assets/undraw_photographer_2rbr.svg" alt="Ілюстрація фотографа" class="mx-auto mt-12 w-3/4 max-w-lg opacity-80"></img>
         
@@ -105,8 +106,7 @@
             </div>
         </div>
 
-        <img src="assets/undraw_image-files_exha.svg" alt="Ілюстрація фотографа" class="mx-auto mt-12 w-3/4 max-w-lg opacity-80"></img>
-
+        
     </div>
 </section>
 
@@ -221,328 +221,320 @@
 
 <!-- Аналіз конкурентів -->
 <section id="competitors" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-    <div class="text-center max-w-3xl mx-auto mb-12">
+    <div class="text-center max-w-3xl mx-auto mb-10">
         <span class="inline-block bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
             Порівняння з конкурентами
         </span>
-        <h2 class="text-3xl font-bold text-slate-900 mb-4">Ті самі задачі — у 12 разів швидше</h2>
-        <p class="text-slate-600">Studio Ninja, HoneyBook, Dubsado та Bloom.io створені для фотографів-фрилансерів: угоди, договори, галереї. Наше рішення — для повноцінного ательє зі складом, друком і найманим персоналом.</p>
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Кращий папір, швидший друк, нижча ціна</h2>
+        <p class="text-slate-600">Порівнюємо PhotoStudio CRM із типовими західними сервісами (Studio Ninja, HoneyBook, Dubsado, Bloom.io) та звичайними ательє, де облік ведуть вручну.</p>
     </div>
 
-    <!-- Картки конкурентів -->
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden">
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
-            <div class="flex items-start justify-between gap-2 mb-3">
-                <h3 class="font-bold text-slate-900">Studio Ninja</h3>
-                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md whitespace-nowrap">~$25/міс</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Проста CRM для фотографа-початківця: угоди, договори, нагадування.</p>
-            <ul class="space-y-2 text-xs text-slate-600 mb-4">
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Угоди та договори</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Рахунки й нагадування</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Мобільний застосунок</li>
-            </ul>
-            <div class="mt-auto border-t border-slate-100 pt-3">
-                <p class="text-[11px] uppercase tracking-wider font-bold text-rose-500 mb-1">Немає</p>
-                <p class="text-xs text-slate-600">Складу, друку, розрахунку ЗП, даних на власному сервері</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
-            <div class="flex items-start justify-between gap-2 mb-3">
-                <h3 class="font-bold text-slate-900">HoneyBook</h3>
-                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md whitespace-nowrap">~$36/міс</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Заявки, угоди й онлайн-оплата для творчих команд.</p>
-            <ul class="space-y-2 text-xs text-slate-600 mb-4">
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Заявки та угоди</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Онлайн-оплата</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Шаблони документів</li>
-            </ul>
-            <div class="mt-auto border-t border-slate-100 pt-3">
-                <p class="text-[11px] uppercase tracking-wider font-bold text-rose-500 mb-1">Немає</p>
-                <p class="text-xs text-slate-600">Складу, обліку друку та рамок, ЗП, власного сервера</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
-            <div class="flex items-start justify-between gap-2 mb-3">
-                <h3 class="font-bold text-slate-900">Dubsado</h3>
-                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md whitespace-nowrap">~$20/міс</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Гнучка автоматизація, але потребує тривалого налаштування.</p>
-            <ul class="space-y-2 text-xs text-slate-600 mb-4">
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Воркфлоу-автоматизація</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Клієнтський портал</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Рахунки та передоплати</li>
-            </ul>
-            <div class="mt-auto border-t border-slate-100 pt-3">
-                <p class="text-[11px] uppercase tracking-wider font-bold text-rose-500 mb-1">Немає</p>
-                <p class="text-xs text-slate-600">Складу, ЗП, готового сценарію для ательє — усе збирається вручну</p>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col">
-            <div class="flex items-start justify-between gap-2 mb-3">
-                <h3 class="font-bold text-slate-900">Bloom.io</h3>
-                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md whitespace-nowrap">~$16/міс</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Об'єднує CRM, портфоліо та доставку готових фото.</p>
-            <ul class="space-y-2 text-xs text-slate-600 mb-4">
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>CRM та угоди</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Портфоліо й галереї</li>
-                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>Доставка фото клієнту</li>
-            </ul>
-            <div class="mt-auto border-t border-slate-100 pt-3">
-                <p class="text-[11px] uppercase tracking-wider font-bold text-rose-500 mb-1">Немає</p>
-                <p class="text-xs text-slate-600">Складу, друку, розрахунку ЗП, власного сервера</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Наше рішення -->
-    <div class="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-6 sm:p-8 mt-5 shadow-xl">
-        <div class="absolute -top-24 -right-24 w-72 h-72 bg-indigo-600/30 blur-3xl rounded-full"></div>
-        <div class="relative grid lg:grid-cols-3 gap-8 items-center">
-            <div class="lg:col-span-2">
-                <div class="flex flex-wrap items-center gap-3 mb-3">
-                    <i class="fa-solid fa-camera-retro text-indigo-400 text-2xl"></i>
-                    <h3 class="text-xl font-bold">PhotoStudio CRM</h3>
-                    <span class="bg-emerald-500 text-slate-900 text-[11px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Усе включено</span>
-                </div>
-                <p class="text-slate-300 text-sm leading-relaxed mb-4">Замінює чотири сервіси та Excel-таблиці: бронювання, оплата з чеком, склад, ЗП, СМС-нагадування й Telegram-бот — в одній системі на вашому сервері.</p>
-                <div class="flex flex-wrap gap-2">
-                    <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5 text-xs"><i class="fa-regular fa-calendar-check mr-1.5 text-indigo-300"></i>Онлайн-бронювання 24/7</span>
-                    <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5 text-xs"><i class="fa-solid fa-boxes-packing mr-1.5 text-indigo-300"></i>Автосписання матеріалів</span>
-                    <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5 text-xs"><i class="fa-solid fa-file-invoice-dollar mr-1.5 text-indigo-300"></i>ЗП за 3 хвилини</span>
-                    <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5 text-xs"><i class="fa-solid fa-server mr-1.5 text-indigo-300"></i>Дані під вашим контролем</span>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 lg:grid-cols-1 gap-3">
-                <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-                    <div class="text-2xl font-extrabold text-emerald-400">×12</div>
-                    <div class="text-[11px] text-slate-400 uppercase tracking-wider">швидше оформлення</div>
-                </div>
-                <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-                    <div class="text-2xl font-extrabold text-emerald-400">×80</div>
-                    <div class="text-[11px] text-slate-400 uppercase tracking-wider">швидше розрахунок ЗП</div>
-                </div>
-                <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-                    <div class="text-2xl font-extrabold text-emerald-400">0 ₴</div>
-                    <div class="text-[11px] text-slate-400 uppercase tracking-wider">щомісячних підписок</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Швидкість виконання операцій -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 mt-16">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-            <div>
-                <h3 class="text-xl font-bold text-slate-900 mb-1">Скільки часу забирає одна й та сама операція</h3>
-                <p class="text-sm text-slate-600">Порівняння з типовою західною CRM, де склад, друк і зарплата ведуться вручну в таблицях.</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500">
-                <span class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-400"></span>Типова CRM + Excel</span>
-                <span class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-indigo-500"></span>PhotoStudio CRM</span>
-            </div>
-        </div>
-
-        <div class="divide-y divide-slate-100">
-
-            <!-- Рядок 1 -->
-            <div class="py-4">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                    <p class="text-sm font-semibold text-slate-900">Оформлення замовлення та оплата</p>
-                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">×12 швидше</span>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Типова CRM</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">8 хв</span>
+        <!-- Верхня панель -->
+        <div class="relative overflow-hidden bg-slate-900 text-white px-6 sm:px-8 py-7">
+            <div class="absolute -top-24 -right-16 w-72 h-72 bg-indigo-600/30 blur-3xl rounded-full"></div>
+            <div class="relative grid lg:grid-cols-5 gap-6 items-center">
+                <div class="lg:col-span-3">
+                    <div class="flex flex-wrap items-center gap-3 mb-2">
+                        <i class="fa-solid fa-camera-retro text-indigo-400 text-2xl"></i>
+                        <h3 class="text-xl font-bold">PhotoStudio CRM</h3>
+                        <span class="bg-emerald-500 text-slate-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Усе включено</span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:8%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">40 сек</span>
-                    </div>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        Одна система замість CRM, Excel і паперових журналів: бронювання, оплата з чеком, склад, ЗП, СМС-нагадування й Telegram-бот — на вашому сервері.
+                    </p>
                 </div>
-            </div>
-
-            <!-- Рядок 2 -->
-            <div class="py-4">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                    <p class="text-sm font-semibold text-slate-900">Пошук вільного слота й бронювання</p>
-                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">×12 швидше</span>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Типова CRM</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">12 хв</span>
+                <div class="lg:col-span-2 grid grid-cols-3 gap-3">
+                    <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-3">
+                        <div class="text-2xl font-extrabold text-emerald-400">×12</div>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider leading-tight">швидше оформлення</div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:8%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">1 хв</span>
+                    <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-3">
+                        <div class="text-2xl font-extrabold text-emerald-400">15 хв</div>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider leading-tight">і друк готовий</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Рядок 3 -->
-            <div class="py-4">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                    <p class="text-sm font-semibold text-slate-900">Списання матеріалів після друку</p>
-                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">автоматично</span>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Типова CRM</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">20 хв</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:3%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">0 хв</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Рядок 4 -->
-            <div class="py-4">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                    <p class="text-sm font-semibold text-slate-900">Розрахунок ЗП за місяць (10 фотографів)</p>
-                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">×80 швидше</span>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Типова CRM</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">4 год</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:3%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">3 хв</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Рядок 5 -->
-            <div class="py-4">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                    <p class="text-sm font-semibold text-slate-900">Фінансовий звіт власнику за місяць</p>
-                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">×90 швидше</span>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Типова CRM</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">3 год</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="w-24 sm:w-32 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
-                        <div class="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:3%"></div>
-                        </div>
-                        <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">2 хв</span>
+                    <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-3">
+                        <div class="text-2xl font-extrabold text-emerald-400">0 ₴</div>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider leading-tight">щомісячних підписок</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <p class="text-[11px] text-slate-400 mt-4 leading-relaxed">
-            Довжина смуги пропорційна витраченому часу. Оцінка для ательє з 3 фотографами та ~120 замовленнями на місяць; для коротких операцій застосовано мінімальну ширину смуги.
-        </p>
-    </div>
+        <!-- Переваги -->
+        <div class="px-6 sm:px-8 py-8">
+            <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Наші переваги проти конкурентів</h3>
+                    <p class="text-sm text-slate-600 mt-1">Що саме отримує клієнт, а що — власник ательє.</p>
+                </div>
+                <div class="flex items-center gap-4 text-[11px] font-semibold text-slate-500">
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>PhotoStudio</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>Конкуренти</span>
+                </div>
+            </div>
 
-    <!-- Порівняльна таблиця -->
-    <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 mt-16">
-        <table class="w-full text-left border-collapse min-w-[900px]">
-            <thead>
-            <tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wide border-b border-slate-200">
-                <th class="p-4 font-bold">CRM-система</th>
-                <th class="p-4 font-bold text-center whitespace-nowrap">Ціна / міс</th>
-                <th class="p-4 font-bold text-center">Бронювання та оплата</th>
-                <th class="p-4 font-bold text-center">Портфоліо та доставка фото</th>
-                <th class="p-4 font-bold text-center">Склад і матеріали</th>
-                <th class="p-4 font-bold text-center">Розрахунок ЗП</th>
-                <th class="p-4 font-bold text-center">Дані на власному сервері</th>
-            </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 text-sm">
-            <tr>
-                <td class="p-4 font-semibold text-slate-900">Studio Ninja <span class="block text-xs font-normal text-slate-500 mt-0.5">для фрилансера-початківця</span></td>
-                <td class="p-4 text-center text-slate-600 font-medium">~$25</td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-            </tr>
-            <tr>
-                <td class="p-4 font-semibold text-slate-900">HoneyBook <span class="block text-xs font-normal text-slate-500 mt-0.5">заявки, угоди, оплата</span></td>
-                <td class="p-4 text-center text-slate-600 font-medium">~$36</td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-            </tr>
-            <tr>
-                <td class="p-4 font-semibold text-slate-900">Dubsado <span class="block text-xs font-normal text-slate-500 mt-0.5">гнучка автоматизація, складне налаштування</span></td>
-                <td class="p-4 text-center text-slate-600 font-medium">~$20</td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-            </tr>
-            <tr>
-                <td class="p-4 font-semibold text-slate-900">Bloom.io <span class="block text-xs font-normal text-slate-500 mt-0.5">CRM + портфоліо + доставка фото</span></td>
-                <td class="p-4 text-center text-slate-600 font-medium">~$16</td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-slate-100 text-slate-400"><i class="fa-solid fa-minus text-[10px]"></i></span></td>
-            </tr>
-            <tr class="bg-indigo-50/70">
-                <td class="p-4 font-bold text-indigo-900">PhotoStudio CRM <span class="block text-xs font-normal text-indigo-700 mt-0.5">комплексне рішення для ательє</span></td>
-                <td class="p-4 text-center text-indigo-700 font-bold">0 ₴<span class="block text-[11px] font-normal">власний сервер</span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-indigo-600 text-white"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-indigo-600 text-white"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-indigo-600 text-white"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-indigo-600 text-white"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-                <td class="p-4 text-center"><span class="inline-flex w-6 h-6 items-center justify-center rounded-full bg-indigo-600 text-white"><i class="fa-solid fa-check text-[10px]"></i></span></td>
-            </tr>
-            </tbody>
-        </table>
+            <div class="grid md:grid-cols-2 gap-4">
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3 mb-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">Папір і матеріали</h4>
+                        <span class="ml-auto text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">краще</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed mb-2 flex gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-900">У нас:</span> преміум-папір Fujifilm / Kodak 260 г/м², глянець або матова фактура на вибір.</span>
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed flex gap-2">
+                        <i class="fa-solid fa-circle-minus text-slate-400 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-600">У конкурентів:</span> стандартний папір 180–200 г/м² без вибору фактури.</span>
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3 mb-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">Швидкість друку</h4>
+                        <span class="ml-auto text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">краще</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed mb-2 flex gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-900">У нас:</span> від 15 хвилин — фото на руках того ж дня, друк просто в ательє.</span>
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed flex gap-2">
+                        <i class="fa-solid fa-circle-minus text-slate-400 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-600">У конкурентів:</span> 3–7 днів, бо друкують на сторонній лабораторії.</span>
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3 mb-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">Кольоропроба та ретуш</h4>
+                        <span class="ml-auto text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">краще</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed mb-2 flex gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-900">У нас:</span> безкоштовна корекція кольору та пробний відбиток перед друком.</span>
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed flex gap-2">
+                        <i class="fa-solid fa-circle-minus text-slate-400 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-600">У конкурентів:</span> друк «як є» — кольори часто відрізняються від екрана.</span>
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3 mb-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fa-regular fa-image"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">Формати та оформлення</h4>
+                        <span class="ml-auto text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">краще</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed mb-2 flex gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-900">У нас:</span> формати до А2, рамки й паспарту власного виробництва, багет.</span>
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed flex gap-2">
+                        <i class="fa-solid fa-circle-minus text-slate-400 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-600">У конкурентів:</span> зазвичай до А4, рамки купують окремо в іншому місці.</span>
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3 mb-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">Склад і собівартість</h4>
+                        <span class="ml-auto text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">краще</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed mb-2 flex gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-900">У нас:</span> автосписання паперу, рамок і картриджів, залишки в реальному часі.</span>
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed flex gap-2">
+                        <i class="fa-solid fa-circle-minus text-slate-400 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-600">У конкурентів:</span> ручні таблиці — брак паперу помічають уже під час зйомки.</span>
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3 mb-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-server"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900">Ціна володіння</h4>
+                        <span class="ml-auto text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">краще</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed mb-2 flex gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-900">У нас:</span> 0 ₴ щомісячних підписок, дані та фотографії на вашому сервері.</span>
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed flex gap-2">
+                        <i class="fa-solid fa-circle-minus text-slate-400 mt-0.5 shrink-0"></i>
+                        <span><span class="font-semibold text-slate-600">У конкурентів:</span> $16–36/міс + доплати за модулі, дані у хмарі вендора.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Швидкість -->
+        <div class="border-t border-slate-200 bg-slate-50 px-6 sm:px-8 py-8">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-5">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-1">Швидкість: одна й та сама операція</h3>
+                    <p class="text-sm text-slate-600">Час на виконання в PhotoStudio CRM проти типового ательє з ручним обліком.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <span class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-400"></span>Типове ательє / CRM</span>
+                    <span class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-indigo-500"></span>PhotoStudio CRM</span>
+                </div>
+            </div>
+
+            <div class="divide-y divide-slate-200">
+
+                <div class="py-4 first:pt-0">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                        <p class="text-sm font-semibold text-slate-900">Оформлення замовлення та оплата</p>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-1 rounded-full">×12 швидше</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Конкуренти</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">8 хв</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:8%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">40 сек</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="py-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                        <p class="text-sm font-semibold text-slate-900">Друк 20 фото 10×15</p>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-1 rounded-full">×8 швидше</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Конкуренти</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">2 год</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:12%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">15 хв</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="py-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                        <p class="text-sm font-semibold text-slate-900">Замовлення з рамкою «під ключ»</p>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-1 rounded-full">×4 швидше</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Конкуренти</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">4 дні</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:25%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">1 день</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="py-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                        <p class="text-sm font-semibold text-slate-900">Розрахунок ЗП за місяць (10 фотографів)</p>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-1 rounded-full">×80 швидше</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Конкуренти</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">4 год</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:3%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">3 хв</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="py-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                        <p class="text-sm font-semibold text-slate-900">Списання матеріалів зі складу</p>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-1 rounded-full">автоматично</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400">Конкуренти</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-rose-300 to-rose-400" style="width:100%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-slate-500">20 хв</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="w-20 sm:w-28 shrink-0 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-indigo-600">PhotoStudio</span>
+                            <div class="flex-1 h-4 bg-slate-200/70 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600" style="width:3%"></div>
+                            </div>
+                            <span class="w-14 text-right shrink-0 text-xs font-bold text-indigo-700">0 хв</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 mt-4 leading-relaxed">
+                Довжина смуги пропорційна витраченому часу; для дуже коротких операцій застосовано мінімальну ширину. Оцінка для ательє з 3 фотографами та ~120 замовленнями на місяць.
+            </p>
+        </div>
+
+        <!-- Підсумок блоку -->
+        <div class="border-t border-slate-200 px-6 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p class="text-xs text-slate-500">
+                <i class="fa-solid fa-scale-balanced text-slate-400 mr-2"></i>
+                Порівнюємо з: Studio Ninja · HoneyBook · Dubsado · Bloom.io та типовим ательє з ручним обліком.
+            </p>
+            <a href="#order" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">Перевірити на демо →</a>
+        </div>
     </div>
 
     <p class="text-[11px] text-slate-400 mt-3 max-w-4xl leading-relaxed">
-        Ціни — орієнтовні мінімальні тарифи з відкритих джерел станом на 2026 рік. Оцінки швидкості базуються на демо-стенді проєкту та типовому ручному процесі ательє (Excel + паперові журнали).
+        Ціни конкурентів — орієнтовні мінімальні тарифи з відкритих джерел станом на 2026 рік. Показники паперу та швидкості — типові для ринку фотоательє й перевірені на демо-стенді проєкту.
     </p>
 </section>
 
