@@ -35,7 +35,7 @@ public final class Validate {
 
         // 3. Перевірка формату телефону
         if (!phoneValidate(phone)) {
-            JOptionPane.showMessageDialog(parent, "Невірний формат телефону! Має бути 10 цифр (наприклад: 0501234567).",
+            JOptionPane.showMessageDialog(parent, "Невірний формат телефону! Має бути (наприклад: 380971234567).",
                     "Помилка введення", JOptionPane.ERROR_MESSAGE);
             return true;
         }
@@ -56,8 +56,8 @@ public final class Validate {
     }
 
     public static boolean phoneValidate(String phone) {
-        // Перевіряємо, чи це рівно 10 цифр (наприклад, український мобільний без +38)
-        return phone != null && phone.matches("^\\d{10}$");
+        // Перевіряємо, чи це формат E.164 номеру телефона.
+        return phone != null && phone.matches("^[1-9]\\d{1,14}$");
     }
 
     public static boolean emailValidate(String email) {
