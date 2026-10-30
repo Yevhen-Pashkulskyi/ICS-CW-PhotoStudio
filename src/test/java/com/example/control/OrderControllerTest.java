@@ -36,7 +36,7 @@ public class OrderControllerTest {
         p.setFullName("Тестовий Фотограф");
 
         // Створюємо існуюче замовлення на 20 жовтня
-        Client c = new Client("Клієнт", "0501112233", "mail@mail.com", false, 0.0);
+        Client c = new Client("Клієнт", "380501112233", "mail@mail.com", false, 0.0);
         SessionType s = new SessionType(1L, "Портрет", 1, 1000.0);
 
         Order existingOrder = new Order();

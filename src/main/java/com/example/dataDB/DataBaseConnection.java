@@ -10,7 +10,7 @@ public class DataBaseConnection {
     private static final String URL = System.getenv().getOrDefault("DB_URL","jdbc:postgresql://localhost:5432/DB");
 
     // логін у PostgreSQL
-    private static final String USER = System.getenv("DB_USER");
+    private static final String USER = System.getenv().getOrDefault("DB_USER", "postgres");
 
     // пароль від бази даних
     private static final String PASSWORD = System.getenv("DB_PASSWORD");
