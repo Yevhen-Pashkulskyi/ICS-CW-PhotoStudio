@@ -209,28 +209,20 @@ public class OrderDialog extends JDialog {
 
         Timestamp eventDate = new Timestamp(eventUtilDate.getTime());
         Timestamp deliveryDate = new Timestamp(deliveryUtilDate.getTime());
-        LocalDateTime eventDateTime = eventDate.toLocalDateTime();
 
-        // Додаткова перевірка: чи не в минулому часі призначено зйомку
-        if (eventDateTime.isBefore(LocalDateTime.now())) {
-            JOptionPane.showMessageDialog(this, "Дата події не може бути в минулому!", "Помилка дати", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+        // 1. Extract Method: Винесена перевірка дат
+        if (!isValidDateTimeline(eventDate, deliveryDate)) return;
 
-        if (deliveryDate.before(eventDate)) {
-            JOptionPane.showMessageDialog(this, "Дата здачі матеріалу не може бути раніше за саму зйомку!", "Помилка дати", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
+        // 2. Rename Variable
         // Перевірка зайнятості фотографа
-        List<Photographer> freePhotographers = orderController.getAvailablePhotographers(eventDateTime);
+        List<Photographer> freePhotographers = orderController.getAvailablePhotographers(eventDate.toLocalDateTime());
         boolean isBusy = freePhotographers.stream()
                 .noneMatch(p -> p.getId().equals(selectedPhotographer.getId()));
 
         if (isBusy) {
             JOptionPane.showMessageDialog(this,
                     "Увага! Фотограф " + selectedPhotographer.getFullName() +
-                            " вже зайнятий на цей час (" + eventDateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + ").\n" +
+                            " вже зайнятий на цей час (" + eventDate.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + ").\n" +
                             "Оберіть іншого фахівця або змініть дату події.",
                     "Фотограф зайнятий",
                     JOptionPane.ERROR_MESSAGE);
@@ -247,10 +239,10 @@ public class OrderDialog extends JDialog {
         // 3. Створення замовлення та РОЗРАХУНОК ЗНИЖКИ (Виправлено бізнес-логіку)
         Order order = new Order(client, selectedPhotographer, session, eventDate, deliveryDate);
 
-        double basePrice = session.getPrice();
         double discountRate = client.getDiscountRate(); // Наприклад, 10.0 (%)
-        double finalCost = basePrice * (1.0 - (discountRate / 100.0));
-        order.setTotalCost(finalCost);
+
+        // 3. Inline Temp: Проміжні змінні прибрано, логіка делегована самому об'єкту Order (виклик calculateTotalCost)
+        order.setTotalCost(order.calculateTotalCost());
 
         order.setCreatedDate(new Timestamp(System.currentTimeMillis()));
 
@@ -261,7 +253,7 @@ public class OrderDialog extends JDialog {
 
             // Гарне інформаційне повідомлення для користувача
             String successMsg = "Замовлення успішно створено!\nНомер: " + order.getId() +
-                    String.format("\nФінальна вартість: %.2f грн", finalCost);
+                    String.format("\nФінальна вартість: %.2f грн", order.getTotalCost());
             if (discountRate > 0) {
                 successMsg += String.format(" (Враховано знижку клієнта %.0f%%)", discountRate);
             }
@@ -272,6 +264,19 @@ public class OrderDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Помилка при збереженні замовлення: " + e.getMessage(),
                     "Помилка БД", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // Новий виділений метод
+    private boolean isValidDateTimeline(Timestamp event, Timestamp delivery) {
+        if (event.toLocalDateTime().isBefore(LocalDateTime.now())) {
+            JOptionPane.showMessageDialog(this, "Дата події не може бути в минулому!");
+            return false;
+        }
+        if (delivery.before(event)) {
+            JOptionPane.showMessageDialog(this, "Дата здачі матеріалу не може бути раніше за саму зйомку!");
+            return false;
+        }
+        return true;
     }
 
 }

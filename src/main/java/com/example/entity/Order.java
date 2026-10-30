@@ -15,8 +15,10 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class Order implements Serializable {
-
+// 4. Remove Dead Code: Прибрано Serializable
+public class Order {
+    // 5. Replace Magic Number
+    private static final double PERCENTAGE_DIVISOR = 100.0;
     /** Унікальний ідентифікатор замовлення в базі даних. */
     private long id;
 
@@ -89,7 +91,7 @@ public class Order implements Serializable {
 
         // Використовуємо реальну знижку клієнта з БД (discountRate)
         if (this.client != null && client.isRegular() && client.getDiscountRate() > 0) {
-            double discountAmount = currentCost * (client.getDiscountRate() / 100.0);
+            double discountAmount = currentCost * (client.getDiscountRate() / PERCENTAGE_DIVISOR);
             currentCost -= discountAmount;
         }
 
