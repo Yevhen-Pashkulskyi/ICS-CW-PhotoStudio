@@ -10,20 +10,23 @@ import java.util.List;
 
 public class PhotoDAO {
 
+    private static final String INSERT_PHOTO_SQL = "INSERT INTO photos (file_path, order_id) VALUES (?, ?);";
+    private static final String SELECT_BY_ORDER_SQL = "SELECT id, file_path, order_id FROM photos WHERE order_id = ?;";
+
     public void savePhoto(Photo photo) {
         String sql = """
                 insert into photos (file_path, order_id)
                 values (?, ?);
                 """;
         try (Connection connection = DataBaseConnection.getConnection();
-             PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+             PreparedStatement insertStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
 
-            pstm.setString(1, photo.getFilePath());
-            pstm.setLong(2, photo.getOrderId());
+            insertStatement.setString(1, photo.getFilePath());
+            insertStatement.setLong(2, photo.getOrderId());
 
-            pstm.executeUpdate();
+            insertStatement.executeUpdate();
 
-            try (var generatedKeys = pstm.getGeneratedKeys()) {
+            try (var generatedKeys = insertStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     photo.setId(generatedKeys.getLong(1));
                 }
@@ -37,7 +40,7 @@ public class PhotoDAO {
 
     }
 
-    public List<Photo> loadPhotosByClient(Client client) {
+    public List<Photo> getPhotosByOrder(Client client) {
 
         List<Photo> photos = new ArrayList<>();
         String sql = """
@@ -53,9 +56,7 @@ public class PhotoDAO {
             pstmt.setLong(1, client.getId());
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                photos.add(new Photo(rs.getLong("id"),
-                        rs.getString("file_path"),
-                        rs.getLong("order_id")));
+                photos.add(mapRowToPhoto(rs));
             }
 
         } catch (SQLException e) {
@@ -63,6 +64,15 @@ public class PhotoDAO {
             throw new RuntimeException(e);
         }
         return photos;
+    }
+
+    // Метод для мапінгу
+    private Photo mapRowToPhoto(ResultSet rs) throws SQLException {
+        return new Photo(
+                rs.getLong("id"),
+                rs.getString("file_path"),
+                rs.getLong("order_id")
+        );
     }
 
     public List<Photo> loadPhotosByOrder(Long orderId) {
