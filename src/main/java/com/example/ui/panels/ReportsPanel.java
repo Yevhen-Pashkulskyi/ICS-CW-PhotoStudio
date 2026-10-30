@@ -19,7 +19,7 @@ import java.util.List;
  * Панель графічного інтерфейсу для модуля аналітики та звітності.
  */
 public class ReportsPanel extends JPanel {
-
+    private static final String ERROR_MSG_PREFIX = "Помилка генерації SQL-звіту:\n";
     private final OrderController orderController;
     private final JTextArea reportArea;
 
@@ -68,7 +68,7 @@ public class ReportsPanel extends JPanel {
 
         JPanel dbButtonsPanel = new JPanel(new GridLayout(9, 1, 4, 4));
         dbButtonsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        addButton(dbButtonsPanel, "Клієнти заданого фотографа", this::sqlClientsByPhotographer);
+        addButton(dbButtonsPanel, "Клієнти заданого фотографа", this::generateClientsByPhotographerReport);
         addButton(dbButtonsPanel, "Пошук клієнтів на літеру", this::sqlClientsByLetter);
         addButton(dbButtonsPanel, "Замовлення за період", this::sqlOrdersInPeriod);
         addButton(dbButtonsPanel, "Кількість нових за тиждень", this::sqlNewOrdersWeekCount);
@@ -129,18 +129,18 @@ public class ReportsPanel extends JPanel {
         return orderController.getDatabaseManager().getReportDAO();
     }
 
-    private void sqlClientsByPhotographer() {
+    private void generateClientsByPhotographerReport() {
         String input = JOptionPane.showInputDialog(this, "Введіть ID фотографа для аналізу:");
         if (input == null || input.trim().isEmpty()) return;
         try {
             Long id = Long.parseLong(input);
-            List<String[]> data = getReportDAO().getClientsByPhotographer(id);
+
             printTableReport("Список клієнтів фотографа ID " + id,
-                    new String[]{"ПІБ Клієнта", "Дата фотосесії", "Тип зйомки"}, data);
+                    new String[]{"ПІБ Клієнта", "Дата фотосесії", "Тип зйомки"}, getReportDAO().getClientsByPhotographer(id));
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "ID має бути числовим значенням!", "Помилка вводу", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -152,7 +152,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Клієнти на літеру '" + letter + "'",
                     new String[]{"Повне Ім'я", "Телефон", "Email"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -164,7 +164,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Замовлення за Травень 2026 року",
                     new String[]{"ID Ордера", "ID Клієнта", "Дата події", "Вартість"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -177,7 +177,7 @@ public class ReportsPanel extends JPanel {
             sb.append("Результат лічильника: ").append(count).append(" нових звернень.\n");
             reportArea.setText(sb.toString());
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -187,7 +187,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Кількість замовлень по персоналу",
                     new String[]{"Фотограф", "Всього замовлень (шт)"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -197,7 +197,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Майстри з максимальною кількістю замовлень (ALL)",
                     new String[]{"Ім'я кращого фотографа"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -207,7 +207,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Найвищі базові ставки за кожною спеціалізацією",
                     new String[]{"Спеціалізація", "Фотограф", "Ставка"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -217,7 +217,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Фотоографи без замовлень на Травень 2026 (NOT EXISTS)",
                     new String[]{"Вільний персонал"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 
@@ -227,7 +227,7 @@ public class ReportsPanel extends JPanel {
             printTableReport("Аналіз маркерів завантаженості кадрів (UNION)",
                     new String[]{"Фотограф", "Статус системи маркетингу"}, data);
         } catch (Exception e) {
-            reportArea.setText("Помилка генерації SQL-звіту:\n" + e.getMessage());
+            reportArea.setText(ERROR_MSG_PREFIX + e.getMessage());
         }
     }
 

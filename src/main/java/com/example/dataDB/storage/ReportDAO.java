@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReportDAO {
-
+    private static final String MAY_START = "2026-05-01 00:00:00";
+    private static final String MAY_END = "2026-05-31 23:59:59";
     // Лістинг 2.1 – Список клієнтів заданого фотографа
     public List<String[]> getClientsByPhotographer(Long photographerId) {
         List<String[]> result = new ArrayList<>();
@@ -24,9 +25,10 @@ public class ReportDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Timestamp evDate = rs.getTimestamp("event_date");
+                    String formattedDate = (evDate != null) ? evDate.toString() : "Не вказано";
                     result.add(new String[]{
                             rs.getString("full_name"),
-                            evDate != null ? evDate.toString() : "Не вказано", // Безпечно до Null
+                            formattedDate,
                             rs.getString("session_name")
                     });
                 }
@@ -179,7 +181,7 @@ public class ReportDAO {
             WHERE NOT EXISTS (
                 SELECT 1 FROM orders o 
                 WHERE o.photographer_id = p.id 
-                  AND o.event_date BETWEEN '2026-05-01 00:00:00' AND '2026-05-31 23:59:59'
+                  AND o.event_date BETWEEN MAY_START AND MAY_END
             );
             """;
         try (Connection conn = DataBaseConnection.getConnection();
