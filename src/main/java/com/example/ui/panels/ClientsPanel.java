@@ -101,7 +101,6 @@ public class ClientsPanel extends JPanel {
             if (Validate.validateAll(this, name, phone, email)) return;
 
             // 2. Перевірка на дублікати за номером телефону
-            // ВИПРАВЛЕНО: Текст попередження тепер чітко відповідає логіці (перевірка за телефоном)
             if (orderController.findClient(phone) != null) {
                 JOptionPane.showMessageDialog(this,
                         "Клієнт з таким номером телефону вже існує!",

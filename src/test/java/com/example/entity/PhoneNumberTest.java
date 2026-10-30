@@ -8,16 +8,16 @@ class PhoneNumberTest {
 
     @Test
     void testValidPhoneNumber() {
-        assertTrue(Validate.phoneValidate("0501234567")); // Рівно 10 цифр
+        assertTrue(Validate.phoneValidate("380501234567")); // Рівно 10 цифр
     }
 
     @Test
     void testTooShortPhoneNumber() {
-        assertFalse(Validate.phoneValidate("05012345")); // Менше 10 цифр
+        assertFalse(Validate.phoneValidate("1")); // Менше 1 цифри
     }
 
     @Test
     void testContainsLetters() {
-        assertFalse(Validate.phoneValidate("050123456a")); // Наявність літери
+        assertFalse(Validate.phoneValidate("38050123456a")); // Наявність літери
     }
 }

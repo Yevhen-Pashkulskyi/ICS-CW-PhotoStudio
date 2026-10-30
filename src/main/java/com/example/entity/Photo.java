@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Data
 @NoArgsConstructor
-public class Photo implements Serializable {
+public class Photo {
 
     private Long id;
     private String filePath;

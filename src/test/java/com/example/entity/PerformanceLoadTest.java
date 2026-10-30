@@ -11,7 +11,7 @@ class PerformanceLoadTest {
         long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < numberOfRequests; i++) {
-            Validate.phoneValidate("0501234567");
+            Validate.phoneValidate("380501234567");
             Validate.nameValidate("Владислав");
         }
 
