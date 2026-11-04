@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * СТУДЕНТ 1 тестує код СТУДЕНТА 3 (Клас PhotoDAO)
  * Метод Білої Скриньки для getPhotosByOrder(Client client) та loadPhotosByOrder(Long orderId)
  */
 public class PhotoDAOTest {
