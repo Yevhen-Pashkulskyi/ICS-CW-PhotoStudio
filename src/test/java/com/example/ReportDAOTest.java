@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * СТУДЕНТ 3 тестує код СТУДЕНТА 2 (Клас ReportDAO)
  * Метод Білої Скриньки для getClientsByPhotographer(Long photographerId)
  */
 public class ReportDAOTest {
