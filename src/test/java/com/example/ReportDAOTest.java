@@ -38,6 +38,7 @@ public class ReportDAOTest {
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
     }
 
+    
     @AfterEach
     void tearDown() {
         mockedStaticDb.close();
